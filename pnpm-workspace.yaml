@@ -4,3 +4,21 @@ packages:
 
 ignoredBuiltDependencies:
   - faiss-node
+
+onlyBuiltDependencies:
+  - '@vscode/vsce-sign'
+  - esbuild
+  - keytar
+  - protobufjs
+  - tree-sitter
+  - tree-sitter-c-sharp
+  - tree-sitter-cli
+  - tree-sitter-cpp
+  - tree-sitter-go
+  - tree-sitter-java
+  - tree-sitter-javascript
+  - tree-sitter-python
+  - tree-sitter-rust
+  - tree-sitter-scala
+  - tree-sitter-typescript
+  - unrs-resolver

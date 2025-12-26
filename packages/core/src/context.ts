@@ -13,7 +13,6 @@ import {
     VectorDocument,
     VectorSearchResult,
     HybridSearchRequest,
-    HybridSearchOptions,
     HybridSearchResult
 } from './vectordb';
 import { SemanticSearchResult } from './types';
@@ -87,6 +86,7 @@ const DEFAULT_IGNORE_PATTERNS = [
 ];
 
 export interface ContextConfig {
+    name?: string;
     embedding?: Embedding;
     vectorDatabase?: VectorDatabase;
     codeSplitter?: Splitter;
@@ -97,6 +97,7 @@ export interface ContextConfig {
 }
 
 export class Context {
+    private name: string;
     private embedding: Embedding;
     private vectorDatabase: VectorDatabase;
     private codeSplitter: Splitter;
@@ -104,7 +105,8 @@ export class Context {
     private ignorePatterns: string[];
     private synchronizers = new Map<string, FileSynchronizer>();
 
-    constructor(config: ContextConfig = {}) {
+    constructor(config: ContextConfig) {
+        this.name = config.name || 'my-context';
         // Initialize services
         this.embedding = config.embedding || new OpenAIEmbedding({
             apiKey: envManager.get('OPENAI_API_KEY') || 'your-openai-api-key',
@@ -231,12 +233,10 @@ export class Context {
     /**
      * Generate collection name based on codebase path and hybrid mode
      */
-    public getCollectionName(codebasePath: string): string {
+    public getCollectionName(): string {
         const isHybrid = this.getIsHybrid();
-        const normalizedPath = path.resolve(codebasePath);
-        const hash = crypto.createHash('md5').update(normalizedPath).digest('hex');
         const prefix = isHybrid === true ? 'hybrid_code_chunks' : 'code_chunks';
-        return `${prefix}_${hash.substring(0, 8)}`;
+        return `${prefix}_${this.name}`;
     }
 
     /**
@@ -316,7 +316,7 @@ export class Context {
         codebasePath: string,
         progressCallback?: (progress: { phase: string; current: number; total: number; percentage: number }) => void
     ): Promise<{ added: number, removed: number, modified: number }> {
-        const collectionName = this.getCollectionName(codebasePath);
+        const collectionName = this.getCollectionName();
         const synchronizer = this.synchronizers.get(collectionName);
 
         if (!synchronizer) {
@@ -411,7 +411,7 @@ export class Context {
         const searchType = isHybrid === true ? 'hybrid search' : 'semantic search';
         console.log(`[Context] 🔍 Executing ${searchType}: "${query}" in ${codebasePath}`);
 
-        const collectionName = this.getCollectionName(codebasePath);
+        const collectionName = this.getCollectionName();
         console.log(`[Context] 🔍 Using collection: ${collectionName}`);
 
         // Check if collection exists and has data
@@ -521,7 +521,7 @@ export class Context {
      * @returns Whether index exists
      */
     async hasIndex(codebasePath: string): Promise<boolean> {
-        const collectionName = this.getCollectionName(codebasePath);
+        const collectionName = this.getCollectionName();
         return await this.vectorDatabase.hasCollection(collectionName);
     }
 
@@ -538,7 +538,7 @@ export class Context {
 
         progressCallback?.({ phase: 'Checking existing index...', current: 0, total: 100, percentage: 0 });
 
-        const collectionName = this.getCollectionName(codebasePath);
+        const collectionName = this.getCollectionName();
         const collectionExists = await this.vectorDatabase.hasCollection(collectionName);
 
         progressCallback?.({ phase: 'Removing index data...', current: 50, total: 100, percentage: 50 });
@@ -626,7 +626,7 @@ export class Context {
         const isHybrid = this.getIsHybrid();
         const collectionType = isHybrid === true ? 'hybrid vector' : 'vector';
         console.log(`[Context] 🔧 Preparing ${collectionType} collection for codebase: ${codebasePath}${forceReindex ? ' (FORCE REINDEX)' : ''}`);
-        const collectionName = this.getCollectionName(codebasePath);
+        const collectionName = this.getCollectionName();
 
         // Check if collection already exists
         const collectionExists = await this.vectorDatabase.hasCollection(collectionName);
@@ -844,7 +844,7 @@ export class Context {
             });
 
             // Store to vector database
-            await this.vectorDatabase.insertHybrid(this.getCollectionName(codebasePath), documents);
+            await this.vectorDatabase.insertHybrid(this.getCollectionName(), documents);
         } else {
             // Create regular vector documents
             const documents: VectorDocument[] = chunks.map((chunk, index) => {
@@ -874,7 +874,7 @@ export class Context {
             });
 
             // Store to vector database
-            await this.vectorDatabase.insert(this.getCollectionName(codebasePath), documents);
+            await this.vectorDatabase.insert(this.getCollectionName(), documents);
         }
     }
 

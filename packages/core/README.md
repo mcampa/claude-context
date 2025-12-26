@@ -1,17 +1,17 @@
-# @zilliz/claude-context-core
+# @mcampa/claude-context-core
 ![](../../assets/claude-context.png)
 
 The core indexing engine for Claude Context - a powerful tool for semantic search and analysis of codebases using vector embeddings and AI.
 
-[![npm version](https://img.shields.io/npm/v/@zilliz/claude-context-core.svg)](https://www.npmjs.com/package/@zilliz/claude-context-core)
-[![npm downloads](https://img.shields.io/npm/dm/@zilliz/claude-context-core.svg)](https://www.npmjs.com/package/@zilliz/claude-context-core)
+[![npm version](https://img.shields.io/npm/v/@mcampa/claude-context-core.svg)](https://www.npmjs.com/package/@mcampa/claude-context-core)
+[![npm downloads](https://img.shields.io/npm/dm/@mcampa/claude-context-core.svg)](https://www.npmjs.com/package/@mcampa/claude-context-core)
 
 > 📖 **New to Claude Context?** Check out the [main project README](../../README.md) for an overview and quick start guide.
 
 ## Installation
 
 ```bash
-npm install @zilliz/claude-context-core
+npm install @mcampa/claude-context-core
 ```
 
 ### Prepare Environment Variables
@@ -51,7 +51,7 @@ import {
   Context, 
   OpenAIEmbedding, 
   MilvusVectorDatabase 
-} from '@zilliz/claude-context-core';
+} from '@mcampa/claude-context-core';
 
 // Initialize embedding provider
 const embedding = new OpenAIEmbedding({
@@ -67,6 +67,7 @@ const vectorDatabase = new MilvusVectorDatabase({
 
 // Create context instance
 const context = new Context({
+  name: 'my-context',
   embedding,
   vectorDatabase
 });
@@ -193,7 +194,7 @@ interface SemanticSearchResult {
 ### Using VoyageAI Embeddings
 
 ```typescript
-import { Context, MilvusVectorDatabase, VoyageAIEmbedding } from '@zilliz/claude-context-core';
+import { Context, MilvusVectorDatabase, VoyageAIEmbedding } from '@mcampa/claude-context-core';
 
 // Initialize with VoyageAI embedding provider
 const embedding = new VoyageAIEmbedding({
@@ -207,6 +208,7 @@ const vectorDatabase = new MilvusVectorDatabase({
 });
 
 const context = new Context({
+  name: 'my-context',
   embedding,
   vectorDatabase
 });
@@ -216,6 +218,7 @@ const context = new Context({
 
 ```typescript
 const context = new Context({
+  name: 'my-context',
   embedding,
   vectorDatabase,
   supportedExtensions: ['.ts', '.js', '.py', '.java'],
