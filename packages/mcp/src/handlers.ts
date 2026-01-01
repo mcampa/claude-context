@@ -264,7 +264,7 @@ export class ToolHandlers {
       //Check if the snapshot and cloud index are in sync
       if (
         this.snapshotManager.getIndexedCodebases().includes(absolutePath) !==
-        (await this.context.hasIndex(absolutePath))
+        (await this.context.hasIndex())
       ) {
         console.warn(
           `[INDEX-VALIDATION] ❌ Snapshot and cloud index mismatch: ${absolutePath}`,
@@ -295,7 +295,7 @@ export class ToolHandlers {
           );
           this.snapshotManager.removeIndexedCodebase(absolutePath);
         }
-        if (await this.context.hasIndex(absolutePath)) {
+        if (await this.context.hasIndex()) {
           console.log(
             `[FORCE-REINDEX] 🔄 Clearing index for '${absolutePath}'`,
           );
@@ -481,7 +481,7 @@ export class ToolHandlers {
 
       // Store synchronizer in the context (let context manage collection names)
       await this.context.getPreparedCollection(absolutePath);
-      const collectionName = this.context.getCollectionName(absolutePath);
+      const collectionName = this.context.getCollectionName();
       this.context.setSynchronizer(collectionName, synchronizer);
       if (contextForThisTask !== this.context) {
         contextForThisTask.setSynchronizer(collectionName, synchronizer);
@@ -686,7 +686,6 @@ export class ToolHandlers {
 
       // Search in the specified codebase
       const searchResults = await this.context.semanticSearch(
-        absolutePath,
         query,
         Math.min(resultLimit, 50),
         0.3,
