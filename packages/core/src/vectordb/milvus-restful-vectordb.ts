@@ -44,9 +44,9 @@ async function createCollectionWithLimitCheck(
 ): Promise<void> {
   try {
     await makeRequestFn("/collections/create", "POST", collectionSchema);
-  } catch (error: any) {
+  } catch (error) {
     // Check if the error message contains the collection limit exceeded pattern
-    const errorMessage = error.message || error.toString() || "";
+    const errorMessage = String(error);
     if (/exceeded the limit number of collections/i.test(errorMessage)) {
       // Throw the exact message string, not an Error object
       throw COLLECTION_LIMIT_MESSAGE;
@@ -98,7 +98,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
    * Common logic for both gRPC and REST implementations
    */
   protected async resolveAddress(): Promise<string> {
-    let finalConfig = { ...this.config };
+    const finalConfig = { ...this.config };
 
     // If address is not provided, get it using token
     if (!finalConfig.address && finalConfig.token) {
@@ -215,7 +215,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
   async createCollection(
     collectionName: string,
     dimension: number,
-    description?: string,
+    _description?: string,
   ): Promise<void> {
     await this.ensureInitialized();
 
@@ -601,7 +601,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
   async createHybridCollection(
     collectionName: string,
     dimension: number,
-    description?: string,
+    _description?: string,
   ): Promise<void> {
     try {
       const restfulConfig = this.config as MilvusRestfulConfig;

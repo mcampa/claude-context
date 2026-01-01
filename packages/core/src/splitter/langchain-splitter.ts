@@ -50,7 +50,7 @@ export class LangChainCodeSplitter implements Splitter {
         const documents = await splitter.createDocuments([code]);
 
         // Convert to CodeChunk format
-        return documents.map((doc, index) => {
+        return documents.map((doc, _index) => {
           const lines = doc.metadata?.loc?.lines || { from: 1, to: 1 };
           return {
             content: doc.pageContent,
@@ -122,7 +122,7 @@ export class LangChainCodeSplitter implements Splitter {
 
     const documents = await splitter.createDocuments([code]);
 
-    return documents.map((doc, index) => {
+    return documents.map((doc, _index) => {
       const lines = this.estimateLines(doc.pageContent, code);
       return {
         content: doc.pageContent,
@@ -141,7 +141,7 @@ export class LangChainCodeSplitter implements Splitter {
     originalCode: string,
   ): { start: number; end: number } {
     // Simple line number estimation
-    const codeLines = originalCode.split("\n");
+    const _codeLines = originalCode.split("\n");
     const chunkLines = chunk.split("\n");
 
     // Find chunk position in original code

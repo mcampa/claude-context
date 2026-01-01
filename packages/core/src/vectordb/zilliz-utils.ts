@@ -122,7 +122,7 @@ export class ClusterManager {
   private async makeRequest<T>(
     endpoint: string,
     method: "GET" | "POST" = "GET",
-    data?: any,
+    data?: unknown,
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
@@ -162,10 +162,10 @@ export class ClusterManager {
 
       const result = await response.json();
       return result as T;
-    } catch (error: any) {
+    } catch (error) {
       // Log the original error for more details, especially for fetch errors
       console.error("[ZillizUtils] ❌ Original error in makeRequest:", error);
-      throw new Error(`Zilliz API request failed: ${error.message}`);
+      throw new Error(`Zilliz API request failed: ${String(error)}`);
     }
   }
 
@@ -285,10 +285,10 @@ export class ClusterManager {
 
         // Wait before next poll
         await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
-      } catch (error: any) {
+      } catch (error) {
         // If it's a describe cluster error, continue polling
         // The cluster might not be immediately available for describe
-        if (error.message.includes("Failed to describe cluster")) {
+        if (String(error).includes("Failed to describe cluster")) {
           await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
           continue;
         }
@@ -352,8 +352,8 @@ export class ClusterManager {
         );
         return createResponse.clusterDetails.connectAddress;
       }
-    } catch (error: any) {
-      throw new Error(`Failed to get address from token: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Failed to get address from token: ${String(error)}`);
     }
   }
 }

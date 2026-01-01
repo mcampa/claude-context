@@ -2,14 +2,14 @@
 
 // CRITICAL: Redirect console outputs to stderr IMMEDIATELY to avoid interfering with MCP JSON protocol
 // Only MCP protocol messages should go to stdout
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
+const _originalConsoleLog = console.log;
+const _originalConsoleWarn = console.warn;
 
-console.log = (...args: any[]) => {
+console.log = (...args: unknown[]) => {
   process.stderr.write("[LOG] " + args.join(" ") + "\n");
 };
 
-console.warn = (...args: any[]) => {
+console.warn = (...args: unknown[]) => {
   process.stderr.write("[WARN] " + args.join(" ") + "\n");
 };
 

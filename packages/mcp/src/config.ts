@@ -89,7 +89,7 @@ export function getDefaultModelForProvider(provider: string): string {
 // Helper function to get embedding model with provider-specific environment variable priority
 export function getEmbeddingModelForProvider(provider: string): string {
   switch (provider) {
-    case "Ollama":
+    case "Ollama": {
       // For Ollama, prioritize OLLAMA_MODEL over EMBEDDING_MODEL for backward compatibility
       const ollamaModel =
         envManager.get("OLLAMA_MODEL") ||
@@ -103,10 +103,11 @@ export function getEmbeddingModelForProvider(provider: string): string {
         }, selected=${ollamaModel}`,
       );
       return ollamaModel;
+    }
     case "OpenAI":
     case "VoyageAI":
     case "Gemini":
-    default:
+    default: {
       // For all other providers, use EMBEDDING_MODEL or default
       const selectedModel =
         envManager.get("EMBEDDING_MODEL") ||
@@ -117,6 +118,7 @@ export function getEmbeddingModelForProvider(provider: string): string {
         }, selected=${selectedModel}`,
       );
       return selectedModel;
+    }
   }
 }
 

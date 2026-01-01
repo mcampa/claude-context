@@ -525,7 +525,7 @@ export class SnapshotManager {
 
       // Always save in v2 format after loading (migration)
       this.saveCodebaseSnapshot();
-    } catch (error: any) {
+    } catch (error) {
       console.error("[SNAPSHOT-DEBUG] Error loading snapshot:", error);
       console.log(
         "[SNAPSHOT-DEBUG] Starting with empty codebase list due to snapshot error.",
@@ -576,7 +576,7 @@ export class SnapshotManager {
       console.log(
         `[SNAPSHOT-DEBUG] Snapshot saved successfully in v2 format. Indexed: ${indexedCount}, Indexing: ${indexingCount}, Failed: ${failedCount}`,
       );
-    } catch (error: any) {
+    } catch (error) {
       console.error("[SNAPSHOT-DEBUG] Error saving snapshot:", error);
     }
   }

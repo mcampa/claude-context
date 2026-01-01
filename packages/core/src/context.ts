@@ -553,7 +553,7 @@ export class Context {
     if (isHybrid === true) {
       try {
         // Check collection stats to see if it has data
-        const stats = await this.vectorDatabase.query(
+        const _stats = await this.vectorDatabase.query(
           collectionName,
           "",
           ["id"],
@@ -1079,8 +1079,12 @@ export class Context {
           chunk.metadata.filePath,
         );
         const fileExtension = path.extname(chunk.metadata.filePath);
-        const { filePath, startLine, endLine, ...restMetadata } =
-          chunk.metadata;
+        const {
+          filePath: _filePath,
+          startLine: _startLine,
+          endLine: _endLine,
+          ...restMetadata
+        } = chunk.metadata;
 
         return {
           id: this.generateId(
@@ -1124,8 +1128,12 @@ export class Context {
           chunk.metadata.filePath,
         );
         const fileExtension = path.extname(chunk.metadata.filePath);
-        const { filePath, startLine, endLine, ...restMetadata } =
-          chunk.metadata;
+        const {
+          filePath: _filePath,
+          startLine: _startLine,
+          endLine: _endLine,
+          ...restMetadata
+        } = chunk.metadata;
 
         return {
           id: this.generateId(
@@ -1234,7 +1242,7 @@ export class Context {
    */
   private async loadIgnorePatterns(codebasePath: string): Promise<void> {
     try {
-      let fileBasedPatterns: string[] = [];
+      const fileBasedPatterns: string[] = [];
 
       // Load all .xxxignore files in codebase directory
       const ignoreFiles = await this.findIgnoreFiles(codebasePath);
@@ -1312,7 +1320,7 @@ export class Context {
         globalIgnorePath,
         "global .contextignore",
       );
-    } catch (error) {
+    } catch (_error) {
       // Global ignore file is optional, don't log warnings
       return [];
     }
@@ -1343,7 +1351,7 @@ export class Context {
         console.log(`📄 ${fileName} file found but no valid patterns detected`);
         return [];
       }
-    } catch (error) {
+    } catch (_error) {
       if (fileName.includes("global")) {
         console.log(`📄 No ${fileName} file found`);
       }

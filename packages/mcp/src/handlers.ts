@@ -180,10 +180,10 @@ export class ToolHandlers {
       }
 
       console.log(`[SYNC-CLOUD] ✅ Cloud sync completed successfully`);
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         `[SYNC-CLOUD] ❌ Error syncing codebases from cloud:`,
-        error.message || error,
+        String(error),
       );
       // Don't throw - this is not critical for the main functionality
     }
@@ -422,7 +422,7 @@ export class ToolHandlers {
           },
         ],
       };
-    } catch (error: any) {
+    } catch (error) {
       // Enhanced error handling to prevent MCP service crash
       console.error("Error in handleIndexCodebase:", error);
 
@@ -431,7 +431,7 @@ export class ToolHandlers {
         content: [
           {
             type: "text",
-            text: `Error starting indexing: ${error.message || error}`,
+            text: `Error starting indexing: ${String(error)}`,
           },
         ],
         isError: true,
@@ -460,7 +460,7 @@ export class ToolHandlers {
       }
 
       // Use the existing Context instance for indexing.
-      let contextForThisTask = this.context;
+      const contextForThisTask = this.context;
       if (splitterType !== "ast") {
         console.warn(
           `[BACKGROUND-INDEX] Non-AST splitter '${splitterType}' requested; falling back to AST splitter`,
@@ -550,7 +550,7 @@ export class ToolHandlers {
       }
 
       console.log(`[BACKGROUND-INDEX] ${message}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         `[BACKGROUND-INDEX] Error during indexing for ${absolutePath}:`,
         error,
@@ -561,7 +561,7 @@ export class ToolHandlers {
         this.snapshotManager.getIndexingProgress(absolutePath);
 
       // Set codebase to failed status with error information
-      const errorMessage = error.message || String(error);
+      const errorMessage = String(error);
       this.snapshotManager.setCodebaseIndexFailed(
         absolutePath,
         errorMessage,
@@ -856,8 +856,8 @@ export class ToolHandlers {
       try {
         await this.context.clearIndex(absolutePath);
         console.log(`[CLEAR] Successfully cleared index for: ${absolutePath}`);
-      } catch (error: any) {
-        const errorMsg = `Failed to clear ${absolutePath}: ${error.message}`;
+      } catch (error) {
+        const errorMsg = `Failed to clear ${absolutePath}: ${String(error)}`;
         console.error(`[CLEAR] ${errorMsg}`);
         return {
           content: [
@@ -1052,12 +1052,12 @@ export class ToolHandlers {
           },
         ],
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         content: [
           {
             type: "text",
-            text: `Error getting indexing status: ${error.message || error}`,
+            text: `Error getting indexing status: ${String(error)}`,
           },
         ],
         isError: true,

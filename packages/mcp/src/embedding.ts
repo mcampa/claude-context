@@ -15,7 +15,7 @@ export function createEmbeddingInstance(
   );
 
   switch (config.embeddingProvider) {
-    case "OpenAI":
+    case "OpenAI": {
       if (!config.openaiApiKey) {
         console.error(
           `[EMBEDDING] ❌ OpenAI API key is required but not provided`,
@@ -36,8 +36,9 @@ export function createEmbeddingInstance(
         `[EMBEDDING] ✅ OpenAI embedding instance created successfully`,
       );
       return openaiEmbedding;
+    }
 
-    case "VoyageAI":
+    case "VoyageAI": {
       if (!config.voyageaiApiKey) {
         console.error(
           `[EMBEDDING] ❌ VoyageAI API key is required but not provided`,
@@ -57,8 +58,9 @@ export function createEmbeddingInstance(
         `[EMBEDDING] ✅ VoyageAI embedding instance created successfully`,
       );
       return voyageEmbedding;
+    }
 
-    case "Gemini":
+    case "Gemini": {
       if (!config.geminiApiKey) {
         console.error(
           `[EMBEDDING] ❌ Gemini API key is required but not provided`,
@@ -79,8 +81,9 @@ export function createEmbeddingInstance(
         `[EMBEDDING] ✅ Gemini embedding instance created successfully`,
       );
       return geminiEmbedding;
+    }
 
-    case "Ollama":
+    case "Ollama": {
       const ollamaHost = config.ollamaHost || "http://127.0.0.1:11434";
       console.log(
         `[EMBEDDING] 🔧 Configuring Ollama with model: ${config.embeddingModel}, host: ${ollamaHost}`,
@@ -93,6 +96,7 @@ export function createEmbeddingInstance(
         `[EMBEDDING] ✅ Ollama embedding instance created successfully`,
       );
       return ollamaEmbedding;
+    }
 
     default:
       console.error(

@@ -41,7 +41,7 @@ export class SyncManager {
     );
 
     try {
-      let totalStats = { added: 0, removed: 0, modified: 0 };
+      const totalStats = { added: 0, removed: 0, modified: 0 };
 
       for (let i = 0; i < indexedCodebases.length; i++) {
         const codebasePath = indexedCodebases[i];
@@ -101,25 +101,28 @@ export class SyncManager {
               `[SYNC] No changes detected for '${codebasePath}' (${codebaseElapsed}ms)`,
             );
           }
-        } catch (error: any) {
+        } catch (error) {
           const codebaseElapsed = Date.now() - codebaseStartTime;
           console.error(
             `[SYNC-DEBUG] Error syncing codebase '${codebasePath}' after ${codebaseElapsed}ms:`,
             error,
           );
-          console.error(`[SYNC-DEBUG] Error stack:`, error.stack);
+          if (error instanceof Error) {
+            console.error(`[SYNC-DEBUG] Error stack:`, error.stack);
+          }
 
-          if (error.message.includes("Failed to query Milvus")) {
+          if (String(error).includes("Failed to query Milvus")) {
             // Collection maybe deleted manually, delete the snapshot file
             await FileSynchronizer.deleteSnapshot(codebasePath);
           }
 
           // Log additional error details
-          if (error.code) {
-            console.error(`[SYNC-DEBUG] Error code: ${error.code}`);
+          const nodeError = error as NodeJS.ErrnoException;
+          if (nodeError.code) {
+            console.error(`[SYNC-DEBUG] Error code: ${nodeError.code}`);
           }
-          if (error.errno) {
-            console.error(`[SYNC-DEBUG] Error errno: ${error.errno}`);
+          if (nodeError.errno) {
+            console.error(`[SYNC-DEBUG] Error errno: ${nodeError.errno}`);
           }
 
           // Continue with next codebase even if one fails
@@ -136,13 +139,15 @@ export class SyncManager {
       console.log(
         `[SYNC] Index sync completed for all codebases. Total changes - Added: ${totalStats.added}, Removed: ${totalStats.removed}, Modified: ${totalStats.modified}`,
       );
-    } catch (error: any) {
+    } catch (error) {
       const totalElapsed = Date.now() - syncStartTime;
       console.error(
         `[SYNC-DEBUG] Error during index sync after ${totalElapsed}ms:`,
         error,
       );
-      console.error(`[SYNC-DEBUG] Error stack:`, error.stack);
+      if (error instanceof Error) {
+        console.error(`[SYNC-DEBUG] Error stack:`, error.stack);
+      }
     } finally {
       this.isSyncing = false;
       const totalElapsed = Date.now() - syncStartTime;

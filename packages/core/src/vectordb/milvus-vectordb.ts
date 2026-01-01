@@ -58,7 +58,7 @@ export class MilvusVectorDatabase implements VectorDatabase {
    * Common logic for both gRPC and REST implementations
    */
   protected async resolveAddress(): Promise<string> {
-    let finalConfig = { ...this.config };
+    const finalConfig = { ...this.config };
 
     // If address is not provided, get it using token
     if (!finalConfig.address && finalConfig.token) {
@@ -927,9 +927,9 @@ export class MilvusVectorDatabase implements VectorDatabase {
         });
       }
       return true;
-    } catch (error: any) {
+    } catch (error) {
       // Check if the error message contains the collection limit exceeded pattern
-      const errorMessage = error.message || error.toString() || "";
+      const errorMessage = String(error);
       if (/exceeded the limit number of collections/i.test(errorMessage)) {
         // Return false for collection limit exceeded
         return false;

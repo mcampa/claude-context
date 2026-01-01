@@ -45,9 +45,9 @@ export class FileSynchronizer {
     let entries;
     try {
       entries = await fs.readdir(dir, { withFileTypes: true });
-    } catch (error: any) {
+    } catch (error) {
       console.warn(
-        `[Synchronizer] Cannot read directory ${dir}: ${error.message}`,
+        `[Synchronizer] Cannot read directory ${dir}: ${String(error)}`,
       );
       return fileHashes;
     }
@@ -65,9 +65,9 @@ export class FileSynchronizer {
       let stat;
       try {
         stat = await fs.stat(fullPath);
-      } catch (error: any) {
+      } catch (error) {
         console.warn(
-          `[Synchronizer] Cannot stat ${fullPath}: ${error.message}`,
+          `[Synchronizer] Cannot stat ${fullPath}: ${String(error)}`,
         );
         continue;
       }
@@ -88,9 +88,9 @@ export class FileSynchronizer {
           try {
             const hash = await this.hashFile(fullPath);
             fileHashes.set(relativePath, hash);
-          } catch (error: any) {
+          } catch (error) {
             console.warn(
-              `[Synchronizer] Cannot hash file ${fullPath}: ${error.message}`,
+              `[Synchronizer] Cannot hash file ${fullPath}: ${String(error)}`,
             );
             continue;
           }
@@ -351,8 +351,11 @@ export class FileSynchronizer {
         this.merkleDAG = MerkleDAG.deserialize(obj.merkleDAG);
       }
       console.log(`Loaded snapshot from ${this.snapshotPath}`);
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
         console.log(
           `Snapshot file not found at ${this.snapshotPath}. Generating new one.`,
         );
@@ -378,15 +381,18 @@ export class FileSynchronizer {
     try {
       await fs.unlink(snapshotPath);
       console.log(`Deleted snapshot file: ${snapshotPath}`);
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
         console.log(
           `Snapshot file not found (already deleted): ${snapshotPath}`,
         );
       } else {
         console.error(
           `[Synchronizer] Failed to delete snapshot file ${snapshotPath}:`,
-          error.message,
+          String(error),
         );
         throw error; // Re-throw non-ENOENT errors
       }
