@@ -100,7 +100,7 @@ export function getEmbeddingModelForProvider(provider: string): string {
           envManager.get("OLLAMA_MODEL") || "NOT SET"
         }, EMBEDDING_MODEL=${
           envManager.get("EMBEDDING_MODEL") || "NOT SET"
-        }, selected=${ollamaModel}`
+        }, selected=${ollamaModel}`,
       );
       return ollamaModel;
     case "OpenAI":
@@ -114,7 +114,7 @@ export function getEmbeddingModelForProvider(provider: string): string {
       console.log(
         `[DEBUG] 🎯 ${provider} model selection: EMBEDDING_MODEL=${
           envManager.get("EMBEDDING_MODEL") || "NOT SET"
-        }, selected=${selectedModel}`
+        }, selected=${selectedModel}`,
       );
       return selectedModel;
   }
@@ -126,32 +126,32 @@ export function createMcpConfig(): ContextMcpConfig {
   console.log(
     `[DEBUG]   EMBEDDING_PROVIDER: ${
       envManager.get("EMBEDDING_PROVIDER") || "NOT SET"
-    }`
+    }`,
   );
   console.log(
     `[DEBUG]   EMBEDDING_MODEL: ${
       envManager.get("EMBEDDING_MODEL") || "NOT SET"
-    }`
+    }`,
   );
   console.log(
-    `[DEBUG]   OLLAMA_MODEL: ${envManager.get("OLLAMA_MODEL") || "NOT SET"}`
+    `[DEBUG]   OLLAMA_MODEL: ${envManager.get("OLLAMA_MODEL") || "NOT SET"}`,
   );
   console.log(
     `[DEBUG]   GEMINI_API_KEY: ${
       envManager.get("GEMINI_API_KEY")
         ? "SET (length: " + envManager.get("GEMINI_API_KEY")!.length + ")"
         : "NOT SET"
-    }`
+    }`,
   );
   console.log(
     `[DEBUG]   OPENAI_API_KEY: ${
       envManager.get("OPENAI_API_KEY")
         ? "SET (length: " + envManager.get("OPENAI_API_KEY")!.length + ")"
         : "NOT SET"
-    }`
+    }`,
   );
   console.log(
-    `[DEBUG]   MILVUS_ADDRESS: ${envManager.get("MILVUS_ADDRESS") || "NOT SET"}`
+    `[DEBUG]   MILVUS_ADDRESS: ${envManager.get("MILVUS_ADDRESS") || "NOT SET"}`,
   );
   console.log(`[DEBUG]   NODE_ENV: ${envManager.get("NODE_ENV") || "NOT SET"}`);
 
@@ -166,7 +166,7 @@ export function createMcpConfig(): ContextMcpConfig {
         | "Gemini"
         | "Ollama") || "OpenAI",
     embeddingModel: getEmbeddingModelForProvider(
-      envManager.get("EMBEDDING_PROVIDER") || "OpenAI"
+      envManager.get("EMBEDDING_PROVIDER") || "OpenAI",
     ),
     // Provider-specific API keys
     openaiApiKey: envManager.get("OPENAI_API_KEY"),
@@ -196,7 +196,7 @@ export function logConfigurationSummary(config: ContextMcpConfig): void {
     `[MCP]   Milvus Address: ${
       config.milvusAddress ||
       (config.milvusToken ? "[Auto-resolve from token]" : "[Not configured]")
-    }`
+    }`,
   );
 
   // Log provider-specific configuration without exposing sensitive data
@@ -205,7 +205,7 @@ export function logConfigurationSummary(config: ContextMcpConfig): void {
       console.log(
         `[MCP]   OpenAI API Key: ${
           config.openaiApiKey ? "✅ Configured" : "❌ Missing"
-        }`
+        }`,
       );
       if (config.openaiBaseUrl) {
         console.log(`[MCP]   OpenAI Base URL: ${config.openaiBaseUrl}`);
@@ -215,14 +215,14 @@ export function logConfigurationSummary(config: ContextMcpConfig): void {
       console.log(
         `[MCP]   VoyageAI API Key: ${
           config.voyageaiApiKey ? "✅ Configured" : "❌ Missing"
-        }`
+        }`,
       );
       break;
     case "Gemini":
       console.log(
         `[MCP]   Gemini API Key: ${
           config.geminiApiKey ? "✅ Configured" : "❌ Missing"
-        }`
+        }`,
       );
       if (config.geminiBaseUrl) {
         console.log(`[MCP]   Gemini Base URL: ${config.geminiBaseUrl}`);
@@ -230,7 +230,7 @@ export function logConfigurationSummary(config: ContextMcpConfig): void {
       break;
     case "Ollama":
       console.log(
-        `[MCP]   Ollama Host: ${config.ollamaHost || "http://127.0.0.1:11434"}`
+        `[MCP]   Ollama Host: ${config.ollamaHost || "http://127.0.0.1:11434"}`,
       );
       console.log(`[MCP]   Ollama Model: ${config.embeddingModel}`);
       break;

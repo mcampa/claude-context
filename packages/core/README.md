@@ -83,13 +83,13 @@ const stats = await context.indexCodebase("./my-project", (progress) => {
 });
 
 console.log(
-  `Indexed ${stats.indexedFiles} files with ${stats.totalChunks} chunks`
+  `Indexed ${stats.indexedFiles} files with ${stats.totalChunks} chunks`,
 );
 
 // Search the codebase
 const results = await context.semanticSearch(
   "function that handles user authentication",
-  5
+  5,
 );
 
 results.forEach((result) => {

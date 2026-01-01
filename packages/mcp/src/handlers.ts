@@ -35,7 +35,7 @@ export class ToolHandlers {
   private async syncIndexedCodebasesFromCloud(): Promise<void> {
     try {
       console.log(
-        `[SYNC-CLOUD] 🔄 Syncing indexed codebases from Zilliz Cloud...`
+        `[SYNC-CLOUD] 🔄 Syncing indexed codebases from Zilliz Cloud...`,
       );
 
       // Get all collections using the interface method
@@ -45,7 +45,7 @@ export class ToolHandlers {
       const collections = await vectorDb.listCollections();
 
       console.log(
-        `[SYNC-CLOUD] 📋 Found ${collections.length} collections in Zilliz Cloud`
+        `[SYNC-CLOUD] 📋 Found ${collections.length} collections in Zilliz Cloud`,
       );
 
       if (collections.length === 0) {
@@ -54,17 +54,17 @@ export class ToolHandlers {
         const localCodebases = this.snapshotManager.getIndexedCodebases();
         if (localCodebases.length > 0) {
           console.log(
-            `[SYNC-CLOUD] 🧹 Removing ${localCodebases.length} local codebases as cloud has no collections`
+            `[SYNC-CLOUD] 🧹 Removing ${localCodebases.length} local codebases as cloud has no collections`,
           );
           for (const codebasePath of localCodebases) {
             this.snapshotManager.removeIndexedCodebase(codebasePath);
             console.log(
-              `[SYNC-CLOUD] ➖ Removed local codebase: ${codebasePath}`
+              `[SYNC-CLOUD] ➖ Removed local codebase: ${codebasePath}`,
             );
           }
           this.snapshotManager.saveCodebaseSnapshot();
           console.log(
-            `[SYNC-CLOUD] 💾 Updated snapshot to match empty cloud state`
+            `[SYNC-CLOUD] 💾 Updated snapshot to match empty cloud state`,
           );
         }
         return;
@@ -81,7 +81,7 @@ export class ToolHandlers {
             !collectionName.startsWith("hybrid_code_chunks_")
           ) {
             console.log(
-              `[SYNC-CLOUD] ⏭️  Skipping non-code collection: ${collectionName}`
+              `[SYNC-CLOUD] ⏭️  Skipping non-code collection: ${collectionName}`,
             );
             continue;
           }
@@ -93,7 +93,7 @@ export class ToolHandlers {
             collectionName,
             "", // Empty filter to get all results
             ["metadata"], // Only fetch metadata field
-            1 // Only need one result to extract codebasePath
+            1, // Only need one result to extract codebasePath
           );
 
           if (results && results.length > 0) {
@@ -107,49 +107,49 @@ export class ToolHandlers {
 
                 if (codebasePath && typeof codebasePath === "string") {
                   console.log(
-                    `[SYNC-CLOUD] 📍 Found codebase path: ${codebasePath} in collection: ${collectionName}`
+                    `[SYNC-CLOUD] 📍 Found codebase path: ${codebasePath} in collection: ${collectionName}`,
                   );
                   cloudCodebases.add(codebasePath);
                 } else {
                   console.warn(
-                    `[SYNC-CLOUD] ⚠️  No codebasePath found in metadata for collection: ${collectionName}`
+                    `[SYNC-CLOUD] ⚠️  No codebasePath found in metadata for collection: ${collectionName}`,
                   );
                 }
               } catch (parseError) {
                 console.warn(
                   `[SYNC-CLOUD] ⚠️  Failed to parse metadata JSON for collection ${collectionName}:`,
-                  parseError
+                  parseError,
                 );
               }
             } else {
               console.warn(
-                `[SYNC-CLOUD] ⚠️  No metadata found in collection: ${collectionName}`
+                `[SYNC-CLOUD] ⚠️  No metadata found in collection: ${collectionName}`,
               );
             }
           } else {
             console.log(
-              `[SYNC-CLOUD] ℹ️  Collection ${collectionName} is empty`
+              `[SYNC-CLOUD] ℹ️  Collection ${collectionName} is empty`,
             );
           }
         } catch (collectionError: any) {
           console.warn(
             `[SYNC-CLOUD] ⚠️  Error checking collection ${collectionName}:`,
-            collectionError.message || collectionError
+            collectionError.message || collectionError,
           );
           // Continue with next collection
         }
       }
 
       console.log(
-        `[SYNC-CLOUD] 📊 Found ${cloudCodebases.size} valid codebases in cloud`
+        `[SYNC-CLOUD] 📊 Found ${cloudCodebases.size} valid codebases in cloud`,
       );
 
       // Get current local codebases
       const localCodebases = new Set(
-        this.snapshotManager.getIndexedCodebases()
+        this.snapshotManager.getIndexedCodebases(),
       );
       console.log(
-        `[SYNC-CLOUD] 📊 Found ${localCodebases.size} local codebases in snapshot`
+        `[SYNC-CLOUD] 📊 Found ${localCodebases.size} local codebases in snapshot`,
       );
 
       let hasChanges = false;
@@ -160,14 +160,14 @@ export class ToolHandlers {
           this.snapshotManager.removeIndexedCodebase(localCodebase);
           hasChanges = true;
           console.log(
-            `[SYNC-CLOUD] ➖ Removed local codebase (not in cloud): ${localCodebase}`
+            `[SYNC-CLOUD] ➖ Removed local codebase (not in cloud): ${localCodebase}`,
           );
         }
       }
 
       // Note: We don't add cloud codebases that are missing locally (as per user requirement)
       console.log(
-        `[SYNC-CLOUD] ℹ️  Skipping addition of cloud codebases not present locally (per sync policy)`
+        `[SYNC-CLOUD] ℹ️  Skipping addition of cloud codebases not present locally (per sync policy)`,
       );
 
       if (hasChanges) {
@@ -175,7 +175,7 @@ export class ToolHandlers {
         console.log(`[SYNC-CLOUD] 💾 Updated snapshot to match cloud state`);
       } else {
         console.log(
-          `[SYNC-CLOUD] ✅ Local snapshot already matches cloud state`
+          `[SYNC-CLOUD] ✅ Local snapshot already matches cloud state`,
         );
       }
 
@@ -183,7 +183,7 @@ export class ToolHandlers {
     } catch (error: any) {
       console.error(
         `[SYNC-CLOUD] ❌ Error syncing codebases from cloud:`,
-        error.message || error
+        error.message || error,
       );
       // Don't throw - this is not critical for the main functionality
     }
@@ -267,7 +267,7 @@ export class ToolHandlers {
         (await this.context.hasIndex(absolutePath))
       ) {
         console.warn(
-          `[INDEX-VALIDATION] ❌ Snapshot and cloud index mismatch: ${absolutePath}`
+          `[INDEX-VALIDATION] ❌ Snapshot and cloud index mismatch: ${absolutePath}`,
         );
       }
 
@@ -291,13 +291,13 @@ export class ToolHandlers {
       if (forceReindex) {
         if (this.snapshotManager.getIndexedCodebases().includes(absolutePath)) {
           console.log(
-            `[FORCE-REINDEX] 🔄 Removing '${absolutePath}' from indexed list for re-indexing`
+            `[FORCE-REINDEX] 🔄 Removing '${absolutePath}' from indexed list for re-indexing`,
           );
           this.snapshotManager.removeIndexedCodebase(absolutePath);
         }
         if (await this.context.hasIndex(absolutePath)) {
           console.log(
-            `[FORCE-REINDEX] 🔄 Clearing index for '${absolutePath}'`
+            `[FORCE-REINDEX] 🔄 Clearing index for '${absolutePath}'`,
           );
           await this.context.clearIndex(absolutePath);
         }
@@ -306,7 +306,7 @@ export class ToolHandlers {
       // CRITICAL: Pre-index collection creation validation
       try {
         console.log(
-          `[INDEX-VALIDATION] 🔍 Validating collection creation capability`
+          `[INDEX-VALIDATION] 🔍 Validating collection creation capability`,
         );
         const canCreateCollection = await this.context
           .getVectorDatabase()
@@ -314,7 +314,7 @@ export class ToolHandlers {
 
         if (!canCreateCollection) {
           console.error(
-            `[INDEX-VALIDATION] ❌ Collection limit validation failed: ${absolutePath}`
+            `[INDEX-VALIDATION] ❌ Collection limit validation failed: ${absolutePath}`,
           );
 
           // CRITICAL: Immediately return the COLLECTION_LIMIT_MESSAGE to MCP client
@@ -330,13 +330,13 @@ export class ToolHandlers {
         }
 
         console.log(
-          `[INDEX-VALIDATION] ✅  Collection creation validation completed`
+          `[INDEX-VALIDATION] ✅  Collection creation validation completed`,
         );
       } catch (validationError: any) {
         // Handle other collection creation errors
         console.error(
           `[INDEX-VALIDATION] ❌ Collection creation validation failed:`,
-          validationError
+          validationError,
         );
         return {
           content: [
@@ -356,7 +356,7 @@ export class ToolHandlers {
         console.log(
           `[CUSTOM-EXTENSIONS] Adding ${
             customFileExtensions.length
-          } custom extensions: ${customFileExtensions.join(", ")}`
+          } custom extensions: ${customFileExtensions.join(", ")}`,
         );
         this.context.addCustomExtensions(customFileExtensions);
       }
@@ -366,7 +366,7 @@ export class ToolHandlers {
         console.log(
           `[IGNORE-PATTERNS] Adding ${
             customIgnorePatterns.length
-          } custom ignore patterns: ${customIgnorePatterns.join(", ")}`
+          } custom ignore patterns: ${customIgnorePatterns.join(", ")}`,
         );
         this.context.addCustomIgnorePatterns(customIgnorePatterns);
       }
@@ -376,12 +376,12 @@ export class ToolHandlers {
         this.snapshotManager.getCodebaseStatus(absolutePath);
       if (currentStatus === "indexfailed") {
         const failedInfo = this.snapshotManager.getCodebaseInfo(
-          absolutePath
+          absolutePath,
         ) as any;
         console.log(
           `[BACKGROUND-INDEX] Retrying indexing for previously failed codebase. Previous error: ${
             failedInfo?.errorMessage || "Unknown error"
-          }`
+          }`,
         );
       }
 
@@ -442,20 +442,20 @@ export class ToolHandlers {
   private async startBackgroundIndexing(
     codebasePath: string,
     forceReindex: boolean,
-    splitterType: string
+    splitterType: string,
   ) {
     const absolutePath = codebasePath;
     let lastSaveTime = 0; // Track last save timestamp
 
     try {
       console.log(
-        `[BACKGROUND-INDEX] Starting background indexing for: ${absolutePath}`
+        `[BACKGROUND-INDEX] Starting background indexing for: ${absolutePath}`,
       );
 
       // Note: If force reindex, collection was already cleared during validation phase
       if (forceReindex) {
         console.log(
-          `[BACKGROUND-INDEX] ℹ️  Force reindex mode - collection was already cleared during validation`
+          `[BACKGROUND-INDEX] ℹ️  Force reindex mode - collection was already cleared during validation`,
         );
       }
 
@@ -463,7 +463,7 @@ export class ToolHandlers {
       let contextForThisTask = this.context;
       if (splitterType !== "ast") {
         console.warn(
-          `[BACKGROUND-INDEX] Non-AST splitter '${splitterType}' requested; falling back to AST splitter`
+          `[BACKGROUND-INDEX] Non-AST splitter '${splitterType}' requested; falling back to AST splitter`,
         );
       }
 
@@ -474,7 +474,7 @@ export class ToolHandlers {
       const { FileSynchronizer } = await import("@mcampa/claude-context-core");
       const ignorePatterns = this.context.getIgnorePatterns() || [];
       console.log(
-        `[BACKGROUND-INDEX] Using ignore patterns: ${ignorePatterns.join(", ")}`
+        `[BACKGROUND-INDEX] Using ignore patterns: ${ignorePatterns.join(", ")}`,
       );
       const synchronizer = new FileSynchronizer(absolutePath, ignorePatterns);
       await synchronizer.initialize();
@@ -488,18 +488,18 @@ export class ToolHandlers {
       }
 
       console.log(
-        `[BACKGROUND-INDEX] Starting indexing with ${splitterType} splitter for: ${absolutePath}`
+        `[BACKGROUND-INDEX] Starting indexing with ${splitterType} splitter for: ${absolutePath}`,
       );
 
       // Log embedding provider information before indexing
       const embeddingProvider = this.context.getEmbedding();
       console.log(
-        `[BACKGROUND-INDEX] 🧠 Using embedding provider: ${embeddingProvider.getProvider()} with dimension: ${embeddingProvider.getDimension()}`
+        `[BACKGROUND-INDEX] 🧠 Using embedding provider: ${embeddingProvider.getProvider()} with dimension: ${embeddingProvider.getDimension()}`,
       );
 
       // Start indexing with the appropriate context and progress tracking
       console.log(
-        `[BACKGROUND-INDEX] 🚀 Beginning codebase indexing process...`
+        `[BACKGROUND-INDEX] 🚀 Beginning codebase indexing process...`,
       );
       const stats = await contextForThisTask.indexCodebase(
         absolutePath,
@@ -507,7 +507,7 @@ export class ToolHandlers {
           // Update progress in snapshot manager using new method
           this.snapshotManager.setCodebaseIndexing(
             absolutePath,
-            progress.percentage
+            progress.percentage,
           );
 
           // Save snapshot periodically (every 2 seconds to avoid too frequent saves)
@@ -518,18 +518,18 @@ export class ToolHandlers {
             lastSaveTime = currentTime;
             console.log(
               `[BACKGROUND-INDEX] 💾 Saved progress snapshot at ${progress.percentage.toFixed(
-                1
-              )}%`
+                1,
+              )}%`,
             );
           }
 
           console.log(
-            `[BACKGROUND-INDEX] Progress: ${progress.phase} - ${progress.percentage}% (${progress.current}/${progress.total})`
+            `[BACKGROUND-INDEX] Progress: ${progress.phase} - ${progress.percentage}% (${progress.current}/${progress.total})`,
           );
-        }
+        },
       );
       console.log(
-        `[BACKGROUND-INDEX] ✅ Indexing completed successfully! Files: ${stats.indexedFiles}, Chunks: ${stats.totalChunks}`
+        `[BACKGROUND-INDEX] ✅ Indexing completed successfully! Files: ${stats.indexedFiles}, Chunks: ${stats.totalChunks}`,
       );
 
       // Set codebase to indexed status with complete statistics
@@ -553,7 +553,7 @@ export class ToolHandlers {
     } catch (error: any) {
       console.error(
         `[BACKGROUND-INDEX] Error during indexing for ${absolutePath}:`,
-        error
+        error,
       );
 
       // Get the last attempted progress
@@ -565,13 +565,13 @@ export class ToolHandlers {
       this.snapshotManager.setCodebaseIndexFailed(
         absolutePath,
         errorMessage,
-        lastProgress
+        lastProgress,
       );
       this.snapshotManager.saveCodebaseSnapshot();
 
       // Log error but don't crash MCP service - indexing errors are handled gracefully
       console.error(
-        `[BACKGROUND-INDEX] Indexing failed for ${absolutePath}: ${errorMessage}`
+        `[BACKGROUND-INDEX] Indexing failed for ${absolutePath}: ${errorMessage}`,
       );
     }
   }
@@ -645,16 +645,16 @@ export class ToolHandlers {
       console.log(`[SEARCH] Searching in codebase: ${absolutePath}`);
       console.log(`[SEARCH] Query: "${query}"`);
       console.log(
-        `[SEARCH] Indexing status: ${isIndexing ? "In Progress" : "Completed"}`
+        `[SEARCH] Indexing status: ${isIndexing ? "In Progress" : "Completed"}`,
       );
 
       // Log embedding provider information before search
       const embeddingProvider = this.context.getEmbedding();
       console.log(
-        `[SEARCH] 🧠 Using embedding provider: ${embeddingProvider.getProvider()} for search`
+        `[SEARCH] 🧠 Using embedding provider: ${embeddingProvider.getProvider()} for search`,
       );
       console.log(
-        `[SEARCH] 🔍 Generating embeddings for query using ${embeddingProvider.getProvider()}...`
+        `[SEARCH] 🔍 Generating embeddings for query using ${embeddingProvider.getProvider()}...`,
       );
 
       // Build filter expression from extensionFilter list
@@ -665,7 +665,7 @@ export class ToolHandlers {
           .map((v: string) => v.trim())
           .filter((v: string) => v.length > 0);
         const invalid = cleaned.filter(
-          (e: string) => !(e.startsWith(".") && e.length > 1 && !/\s/.test(e))
+          (e: string) => !(e.startsWith(".") && e.length > 1 && !/\s/.test(e)),
         );
         if (invalid.length > 0) {
           return {
@@ -673,7 +673,7 @@ export class ToolHandlers {
               {
                 type: "text",
                 text: `Error: Invalid file extensions in extensionFilter: ${JSON.stringify(
-                  invalid
+                  invalid,
                 )}. Use proper extensions like '.ts', '.py'.`,
               },
             ],
@@ -690,13 +690,13 @@ export class ToolHandlers {
         query,
         Math.min(resultLimit, 50),
         0.3,
-        filterExpr
+        filterExpr,
       );
 
       console.log(
         `[SEARCH] ✅ Search completed! Found ${
           searchResults.length
-        } results using ${embeddingProvider.getProvider()} embeddings`
+        } results using ${embeddingProvider.getProvider()} embeddings`,
       );
 
       if (searchResults.length === 0) {
@@ -753,8 +753,8 @@ export class ToolHandlers {
         typeof error === "string"
           ? error
           : error instanceof Error
-          ? error.message
-          : String(error);
+            ? error.message
+            : String(error);
 
       if (
         errorMessage === COLLECTION_LIMIT_MESSAGE ||
@@ -906,8 +906,8 @@ export class ToolHandlers {
         typeof error === "string"
           ? error
           : error instanceof Error
-          ? error.message
-          : String(error);
+            ? error.message
+            : String(error);
 
       if (
         errorMessage === COLLECTION_LIMIT_MESSAGE ||
@@ -985,7 +985,7 @@ export class ToolHandlers {
             statusMessage += `\n📊 Statistics: ${indexedInfo.indexedFiles} files, ${indexedInfo.totalChunks} chunks`;
             statusMessage += `\n📅 Status: ${indexedInfo.indexStatus}`;
             statusMessage += `\n🕐 Last updated: ${new Date(
-              indexedInfo.lastUpdated
+              indexedInfo.lastUpdated,
             ).toLocaleString()}`;
           } else {
             statusMessage = `✅ Codebase '${absolutePath}' is fully indexed and ready for search.`;
@@ -997,7 +997,7 @@ export class ToolHandlers {
             const indexingInfo = info as any;
             const progressPercentage = indexingInfo.indexingPercentage || 0;
             statusMessage = `🔄 Codebase '${absolutePath}' is currently being indexed. Progress: ${progressPercentage.toFixed(
-              1
+              1,
             )}%`;
 
             // Add more detailed status based on progress
@@ -1008,7 +1008,7 @@ export class ToolHandlers {
                 " (Processing files and generating embeddings...)";
             }
             statusMessage += `\n🕐 Last updated: ${new Date(
-              indexingInfo.lastUpdated
+              indexingInfo.lastUpdated,
             ).toLocaleString()}`;
           } else {
             statusMessage = `🔄 Codebase '${absolutePath}' is currently being indexed.`;
@@ -1022,11 +1022,11 @@ export class ToolHandlers {
             statusMessage += `\n🚨 Error: ${failedInfo.errorMessage}`;
             if (failedInfo.lastAttemptedPercentage !== undefined) {
               statusMessage += `\n📊 Failed at: ${failedInfo.lastAttemptedPercentage.toFixed(
-                1
+                1,
               )}% progress`;
             }
             statusMessage += `\n🕐 Failed at: ${new Date(
-              failedInfo.lastUpdated
+              failedInfo.lastUpdated,
             ).toLocaleString()}`;
             statusMessage += `\n💡 You can retry indexing by running the index_codebase command again.`;
           } else {

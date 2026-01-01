@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Minified files
+*.min.js
+
+# Package manager
+pnpm-lock.yaml
+
+# Coverage
+coverage/
+.nyc_output/
+

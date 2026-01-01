@@ -11,6 +11,7 @@
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/zilliz_universe.svg?style=social&label=Follow%20%40Zilliz)](https://twitter.com/zilliz_universe)
 [![DeepWiki](https://img.shields.io/badge/DeepWiki-AI%20Docs-purple.svg?logo=gitbook&logoColor=white)](https://deepwiki.com/zilliztech/claude-context)
 <a href="https://discord.gg/mKc3R95yE5"><img height="20" src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" alt="discord" /></a>
+
 </div>
 
 **Claude Context** is an MCP plugin that adds semantic code search to Claude Code and other AI coding agents, giving them deep context from your entire codebase.
@@ -39,12 +40,13 @@ Claude Context needs a vector database. You can [sign up](https://cloud.zilliz.c
 ![](assets/signup_and_get_apikey.png)
 
 Copy your Personal Key to replace `your-zilliz-cloud-api-key` in the configuration examples.
+
 </details>
 
 <details>
 <summary>Get OpenAI API Key for embedding model</summary>
 
-You need an OpenAI API key for the embedding model. You can get one by signing up at [OpenAI](https://platform.openai.com/api-keys).  
+You need an OpenAI API key for the embedding model. You can get one by signing up at [OpenAI](https://platform.openai.com/api-keys).
 
 Your API key will look like this: it always starts with `sk-`.  
 Copy your key and use it in the configuration examples below as `your-openai-api-key`.
@@ -343,7 +345,7 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 
 7. Click the **Add** button.
 
-------
+---
 
 #### **B. Manual Configuration**
 
@@ -353,11 +355,11 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 4. Add the server configuration to the `mcpServers` array in the `augment.advanced` object
 
 ```json
-"augment.advanced": { 
-  "mcpServers": [ 
-    { 
-      "name": "claude-context", 
-      "command": "npx", 
+"augment.advanced": {
+  "mcpServers": [
+    {
+      "name": "claude-context",
+      "command": "npx",
       "args": ["-y", "@zilliz/claude-context-mcp@latest"],
       "env": {
         "OPENAI_API_KEY": "your-openai-api-key",
@@ -412,15 +414,14 @@ Zencoder offers support for MCP tools and servers in both its JetBrains and VS C
 
 ```json
 {
-    "command": "npx",
-    "args": ["@zilliz/claude-context-mcp@latest"],
-    "env": {
-      "OPENAI_API_KEY": "your-openai-api-key",
-      "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
-      "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
-    }
+  "command": "npx",
+  "args": ["@zilliz/claude-context-mcp@latest"],
+  "env": {
+    "OPENAI_API_KEY": "your-openai-api-key",
+    "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
+    "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
+  }
 }
-
 ```
 
 5. Save the server by hitting the `Install` button.
@@ -526,7 +527,7 @@ For detailed evaluation methodology and results, see the [evaluation directory](
 
 ### 🔧 Implementation Details
 
-- 🔍 **Hybrid Code Search**: Ask questions like *"find functions that handle user authentication"* and get relevant, context-rich code instantly using advanced hybrid search (BM25 + dense vector).
+- 🔍 **Hybrid Code Search**: Ask questions like _"find functions that handle user authentication"_ and get relevant, context-rich code instantly using advanced hybrid search (BM25 + dense vector).
 - 🧠 **Context-Aware**: Discover large codebase, understand how different parts of your codebase relate, even across millions of lines of code.
 - ⚡ **Incremental Indexing**: Efficiently re-index only changed files using Merkle trees.
 - 🧩 **Intelligent Code Chunking**: Analyze code in Abstract Syntax Trees (AST) for chunking.
@@ -560,38 +561,44 @@ While MCP is the recommended way to use Claude Context with AI assistants, you c
 The `@zilliz/claude-context-core` package provides the fundamental functionality for code indexing and semantic search.
 
 ```typescript
-import { Context, MilvusVectorDatabase, OpenAIEmbedding } from '@zilliz/claude-context-core';
+import {
+  Context,
+  MilvusVectorDatabase,
+  OpenAIEmbedding,
+} from "@zilliz/claude-context-core";
 
 // Initialize embedding provider
 const embedding = new OpenAIEmbedding({
-    apiKey: process.env.OPENAI_API_KEY || 'your-openai-api-key',
-    model: 'text-embedding-3-small'
+  apiKey: process.env.OPENAI_API_KEY || "your-openai-api-key",
+  model: "text-embedding-3-small",
 });
 
 // Initialize vector database
 const vectorDatabase = new MilvusVectorDatabase({
-    address: process.env.MILVUS_ADDRESS || 'your-zilliz-cloud-public-endpoint',
-    token: process.env.MILVUS_TOKEN || 'your-zilliz-cloud-api-key'
+  address: process.env.MILVUS_ADDRESS || "your-zilliz-cloud-public-endpoint",
+  token: process.env.MILVUS_TOKEN || "your-zilliz-cloud-api-key",
 });
 
 // Create context instance
 const context = new Context({
-    embedding,
-    vectorDatabase
+  embedding,
+  vectorDatabase,
 });
 
 // Index your codebase with progress tracking
-const stats = await context.indexCodebase('./your-project', (progress) => {
-    console.log(`${progress.phase} - ${progress.percentage}%`);
+const stats = await context.indexCodebase("./your-project", (progress) => {
+  console.log(`${progress.phase} - ${progress.percentage}%`);
 });
 console.log(`Indexed ${stats.indexedFiles} files, ${stats.totalChunks} chunks`);
 
 // Perform semantic search
-const results = await context.semanticSearch('vector database operations', 5);
-results.forEach(result => {
-    console.log(`File: ${result.relativePath}:${result.startLine}-${result.endLine}`);
-    console.log(`Score: ${(result.score * 100).toFixed(2)}%`);
-    console.log(`Content: ${result.content.substring(0, 100)}...`);
+const results = await context.semanticSearch("vector database operations", 5);
+results.forEach((result) => {
+  console.log(
+    `File: ${result.relativePath}:${result.startLine}-${result.endLine}`,
+  );
+  console.log(`Score: ${(result.score * 100).toFixed(2)}%`);
+  console.log(`Content: ${result.content.substring(0, 100)}...`);
 });
 ```
 
@@ -601,12 +608,11 @@ Integrates Claude Context directly into your IDE. Provides an intuitive interfac
 
 1. **Direct Link**: [Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=zilliz.semanticcodesearch)
 2. **Manual Search**:
-    - Open Extensions view in VSCode (Ctrl+Shift+X or Cmd+Shift+X on Mac)
-    - Search for "Semantic Code Search"
-    - Click Install
+   - Open Extensions view in VSCode (Ctrl+Shift+X or Cmd+Shift+X on Mac)
+   - Search for "Semantic Code Search"
+   - Click Install
 
-![img](https://lh7-rt.googleusercontent.com/docsz/AD_4nXdtCtT9Qi6o5mGVoxzX50r8Nb6zDFcjvTQR7WZ-xMbEsHEPPhSYAFVJ7q4-rETzxJ8wy1cyZmU8CmtpNhAU8PGOqVnE2kc2HCn1etDg97Qsh7m89kBjG4ZT7XBgO4Dp7BfFZx7eow?key=qYdFquJrLcfXCUndY-YRBQ)
----
+## ![img](https://lh7-rt.googleusercontent.com/docsz/AD_4nXdtCtT9Qi6o5mGVoxzX50r8Nb6zDFcjvTQR7WZ-xMbEsHEPPhSYAFVJ7q4-rETzxJ8wy1cyZmU8CmtpNhAU8PGOqVnE2kc2HCn1etDg97Qsh7m89kBjG4ZT7XBgO4Dp7BfFZx7eow?key=qYdFquJrLcfXCUndY-YRBQ)
 
 ## 🛠️ Development
 
@@ -723,7 +729,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 **Package-specific contributing guides:**
 
 - [Core Package Contributing](packages/core/CONTRIBUTING.md)
-- [MCP Server Contributing](packages/mcp/CONTRIBUTING.md)  
+- [MCP Server Contributing](packages/mcp/CONTRIBUTING.md)
 - [VSCode Extension Contributing](packages/vscode-extension/CONTRIBUTING.md)
 
 ---

@@ -10,7 +10,7 @@ You'll need two API keys:
 
 1. **OpenAI API Key**: Get from [OpenAI Platform](https://platform.openai.com/api-keys)
 2. **Zilliz Cloud API Key**: ![](../../assets/signup_and_get_apikey.png)
- [Sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=2507-codecontext-readme) on Zilliz Cloud to get an API key.
+   [Sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=2507-codecontext-readme) on Zilliz Cloud to get an API key.
 
 ### Step 2: Configure Claude Code
 
@@ -40,7 +40,7 @@ Replace the API keys with your actual keys.
    ```
    Find functions that handle user authentication
    ```
-🎉 **That's it!** You now have semantic code search in Claude Code.
+   🎉 **That's it!** You now have semantic code search in Claude Code.
 
 ## Alternative Quick Setups
 
@@ -125,6 +125,7 @@ Go to: `Settings` -> `Cursor Settings` -> `MCP` -> `Add new global MCP server`
 Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file is the recommended approach. You may also install in a specific project by creating `.cursor/mcp.json` in your project folder. See [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol) for more info.
 
 **OpenAI Configuration (Default):**
+
 ```json
 {
   "mcpServers": {
@@ -142,6 +143,7 @@ Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file i
 ```
 
 **VoyageAI Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -160,6 +162,7 @@ Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file i
 ```
 
 **Gemini Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -177,6 +180,7 @@ Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file i
 ```
 
 **Ollama Configuration:**
+
 ```json
 {
   "mcpServers": {
@@ -195,8 +199,6 @@ Pasting the following configuration into your Cursor `~/.cursor/mcp.json` file i
 ```
 
 </details>
-
-
 
 <details>
 <summary><strong>Void</strong></summary>
@@ -362,7 +364,7 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 
 7. Click the **Add** button.
 
-------
+---
 
 #### **B. Manual Configuration**
 
@@ -372,14 +374,14 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 4. Add the server configuration to the `mcpServers` array in the `augment.advanced` object
 
 ```json
-"augment.advanced": { 
-  "mcpServers": [ 
-    { 
-      "name": "claude-context", 
-      "command": "npx", 
-      "args": ["-y", "@zilliz/claude-context-mcp@latest"] 
-    } 
-  ] 
+"augment.advanced": {
+  "mcpServers": [
+    {
+      "name": "claude-context",
+      "command": "npx",
+      "args": ["-y", "@zilliz/claude-context-mcp@latest"]
+    }
+  ]
 }
 ```
 
@@ -413,7 +415,6 @@ Roo Code utilizes a JSON configuration file for MCP servers:
 
 </details>
 
-
 <details>
 <summary><strong>Zencoder</strong></summary>
 
@@ -426,15 +427,14 @@ Zencoder offers support for MCP tools and servers in both its JetBrains and VS C
 
 ```json
 {
-    "command": "npx",
-    "args": ["@zilliz/claude-context-mcp@latest"],
-    "env": {
-      "OPENAI_API_KEY": "your-openai-api-key",
-      "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
-      "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
-    }
+  "command": "npx",
+  "args": ["@zilliz/claude-context-mcp@latest"],
+  "env": {
+    "OPENAI_API_KEY": "your-openai-api-key",
+    "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
+    "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
+  }
 }
-
 ```
 
 5. Save the server by hitting the `Install` button.

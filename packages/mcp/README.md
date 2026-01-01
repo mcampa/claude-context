@@ -520,7 +520,7 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 
 7. Click the **Add** button.
 
-------
+---
 
 #### **B. Manual Configuration**
 
@@ -530,14 +530,14 @@ To configure Claude Context MCP in Augment Code, you can use either the graphica
 4. Add the server configuration to the `mcpServers` array in the `augment.advanced` object
 
 ```json
-"augment.advanced": { 
-  "mcpServers": [ 
-    { 
-      "name": "claude-context", 
-      "command": "npx", 
-      "args": ["-y", "@zilliz/claude-context-mcp@latest"] 
-    } 
-  ] 
+"augment.advanced": {
+  "mcpServers": [
+    {
+      "name": "claude-context",
+      "command": "npx",
+      "args": ["-y", "@zilliz/claude-context-mcp@latest"]
+    }
+  ]
 }
 ```
 
@@ -583,15 +583,14 @@ Zencoder offers support for MCP tools and servers in both its JetBrains and VS C
 
 ```json
 {
-    "command": "npx",
-    "args": ["@zilliz/claude-context-mcp@latest"],
-    "env": {
-      "OPENAI_API_KEY": "your-openai-api-key",
-      "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
-      "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
-    }
+  "command": "npx",
+  "args": ["@zilliz/claude-context-mcp@latest"],
+  "env": {
+    "OPENAI_API_KEY": "your-openai-api-key",
+    "MILVUS_ADDRESS": "your-zilliz-cloud-public-endpoint",
+    "MILVUS_TOKEN": "your-zilliz-cloud-api-key"
+  }
 }
-
 ```
 
 5. Save the server by hitting the `Install` button.
@@ -672,7 +671,7 @@ Get the current indexing status of a codebase. Shows progress percentage for act
 
 This package is part of the Claude Context monorepo. Please see:
 
-- [Main Contributing Guide](../../CONTRIBUTING.md) - General contribution guidelines  
+- [Main Contributing Guide](../../CONTRIBUTING.md) - General contribution guidelines
 - [MCP Package Contributing](CONTRIBUTING.md) - Specific development guide for this package
 
 ## Related Projects

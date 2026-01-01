@@ -57,12 +57,12 @@ class ContextMcpServer {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
     // Initialize embedding provider
     console.log(
-      `[EMBEDDING] Initializing embedding provider: ${config.embeddingProvider}`
+      `[EMBEDDING] Initializing embedding provider: ${config.embeddingProvider}`,
     );
     console.log(`[EMBEDDING] Using model: ${config.embeddingModel}`);
 
@@ -265,7 +265,7 @@ This tool is versatile and can be used before completing various tasks to retrie
 
     const transport = new StdioServerTransport();
     console.log(
-      "[SYNC-DEBUG] StdioServerTransport created, attempting server connection..."
+      "[SYNC-DEBUG] StdioServerTransport created, attempting server connection...",
     );
 
     await this.server.connect(transport);
