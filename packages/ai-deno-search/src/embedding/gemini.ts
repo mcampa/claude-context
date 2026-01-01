@@ -59,8 +59,8 @@ export class GeminiEmbedding extends Embedding {
         model: model,
         contents: processedText,
         config: {
-          outputDimensionality:
-            this.config.outputDimensionality || this.dimension,
+          outputDimensionality: this.config.outputDimensionality ||
+            this.dimension,
         },
       });
 
@@ -78,7 +78,9 @@ export class GeminiEmbedding extends Embedding {
       };
     } catch (error) {
       throw new Error(
-        `Gemini embedding failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Gemini embedding failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       );
     }
   }
@@ -92,8 +94,8 @@ export class GeminiEmbedding extends Embedding {
         model: model,
         contents: processedTexts,
         config: {
-          outputDimensionality:
-            this.config.outputDimensionality || this.dimension,
+          outputDimensionality: this.config.outputDimensionality ||
+            this.dimension,
         },
       });
 
@@ -112,7 +114,9 @@ export class GeminiEmbedding extends Embedding {
       });
     } catch (error) {
       throw new Error(
-        `Gemini batch embedding failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Gemini batch embedding failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       );
     }
   }
@@ -160,10 +164,9 @@ export class GeminiEmbedding extends Embedding {
   }
 
   getSupportedDimensions(): number[] {
-    const modelInfo =
-      GeminiEmbedding.getSupportedModels()[
-        this.config.model || "gemini-embedding-001"
-      ];
+    const modelInfo = GeminiEmbedding.getSupportedModels()[
+      this.config.model || "gemini-embedding-001"
+    ];
     return modelInfo?.supportedDimensions || [this.dimension];
   }
 

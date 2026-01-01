@@ -9,13 +9,13 @@ import {
   assertExists,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  SearchContext,
-  type SearchContextConfig,
   Embedding,
   type EmbeddingVector,
+  type HybridSearchResult,
+  SearchContext,
+  type SearchContextConfig,
   type VectorDatabase,
   type VectorSearchResult,
-  type HybridSearchResult,
 } from "../mod.ts";
 
 // Mock Embedding Provider

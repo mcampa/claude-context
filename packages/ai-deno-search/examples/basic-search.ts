@@ -13,9 +13,9 @@
  */
 
 import {
-  SearchContext,
-  OpenAIEmbedding,
   MilvusRestfulVectorDatabase,
+  OpenAIEmbedding,
+  SearchContext,
 } from "../mod.ts";
 
 // Configuration
@@ -100,12 +100,16 @@ async function main() {
   } else {
     results.forEach((result, i) => {
       console.log(
-        `${i + 1}. ${result.relativePath}:${result.startLine}-${result.endLine}`,
+        `${
+          i + 1
+        }. ${result.relativePath}:${result.startLine}-${result.endLine}`,
       );
       console.log(`   Language: ${result.language}`);
       console.log(`   Score: ${result.score.toFixed(4)}`);
       console.log(
-        `   Preview: ${result.content.substring(0, 150).replace(/\n/g, " ")}...`,
+        `   Preview: ${
+          result.content.substring(0, 150).replace(/\n/g, " ")
+        }...`,
       );
       console.log();
     });

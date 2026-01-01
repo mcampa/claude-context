@@ -8,14 +8,14 @@ export { Embedding } from "../../core/src/embedding/base-embedding.ts";
 
 // Re-export vector DB types
 export type {
-  VectorDocument,
-  SearchOptions,
-  HybridSearchRequest,
   HybridSearchOptions,
+  HybridSearchRequest,
   HybridSearchResult,
-  VectorSearchResult,
-  VectorDatabase,
   RerankStrategy,
+  SearchOptions,
+  VectorDatabase,
+  VectorDocument,
+  VectorSearchResult,
 } from "../../core/src/vectordb/types.ts";
 
 export { COLLECTION_LIMIT_MESSAGE } from "../../core/src/vectordb/types.ts";

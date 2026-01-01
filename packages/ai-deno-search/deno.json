@@ -18,4 +18,3 @@
     "example": "deno run --allow-env --allow-net examples/basic-search.ts"
   }
 }
-

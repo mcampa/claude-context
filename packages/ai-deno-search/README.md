@@ -1,15 +1,20 @@
 # @mcampa/ai-deno-search
 
-Semantic code search for Deno - a lightweight package for searching codebases indexed with [@mcampa/ai-context-core](../core).
+Semantic code search for Deno - a lightweight package for searching codebases
+indexed with [@mcampa/ai-context-core](../core).
 
 ## Overview
 
-This package provides **search-only** functionality for Deno applications. It allows you to perform semantic searches on codebases that have been indexed using the Node.js core package.
+This package provides **search-only** functionality for Deno applications. It
+allows you to perform semantic searches on codebases that have been indexed
+using the Node.js core package.
 
 ### Why Deno Search?
 
-- **Native Deno Support**: Built specifically for Deno with TypeScript and modern APIs
-- **No Native Dependencies**: Pure HTTP/fetch-based, no Node.js bindings required
+- **Native Deno Support**: Built specifically for Deno with TypeScript and
+  modern APIs
+- **No Native Dependencies**: Pure HTTP/fetch-based, no Node.js bindings
+  required
 - **Type-Safe**: Full TypeScript support with types shared from core package
 - **Lightweight**: ~500 LOC vs 1500+ LOC in core (search-only, no indexing)
 - **HTTP-Only**: Uses Milvus REST API (no gRPC dependencies)
@@ -37,9 +42,9 @@ deno add @mcampa/ai-deno-search
 
 ```typescript
 import {
-  SearchContext,
-  OpenAIEmbedding,
   MilvusRestfulVectorDatabase,
+  OpenAIEmbedding,
+  SearchContext,
 } from "https://deno.land/x/deno_search@v0.0.1/mod.ts";
 ```
 
@@ -82,9 +87,9 @@ await context.indexCodebase("./my-project");
 
 ```typescript
 import {
-  SearchContext,
-  OpenAIEmbedding,
   MilvusRestfulVectorDatabase,
+  OpenAIEmbedding,
+  SearchContext,
 } from "@mcampa/ai-deno-search";
 
 // 1. Initialize embedding provider
@@ -110,14 +115,16 @@ const searchContext = new SearchContext({
 // 4. Check if index exists
 const hasIndex = await searchContext.hasIndex();
 if (!hasIndex) {
-  console.error("Index not found. Please index first with @mcampa/ai-context-core");
+  console.error(
+    "Index not found. Please index first with @mcampa/ai-context-core",
+  );
   Deno.exit(1);
 }
 
 // 5. Perform semantic search
 const results = await searchContext.semanticSearch(
   "function that handles user authentication",
-  5 // top K results
+  5, // top K results
 );
 
 // 6. Process results
@@ -155,10 +162,10 @@ const searchContext = new SearchContext(config: SearchContextConfig)
 
 ```typescript
 interface SearchContextConfig {
-  name?: string;              // Context name (must match indexing)
-  embedding: Embedding;       // Embedding provider
+  name?: string; // Context name (must match indexing)
+  embedding: Embedding; // Embedding provider
   vectorDatabase: VectorDatabase; // Vector database instance
-  hybridMode?: boolean;       // Enable hybrid search (default: true)
+  hybridMode?: boolean; // Enable hybrid search (default: true)
 }
 ```
 
@@ -184,7 +191,7 @@ const results = await searchContext.semanticSearch(
   "database connection handler",
   10,
   0.6,
-  'fileExtension == ".ts"'
+  'fileExtension == ".ts"',
 );
 ```
 
@@ -213,6 +220,7 @@ const embedding = new OpenAIEmbedding({
 ```
 
 **Supported Models:**
+
 - `text-embedding-3-small` (1536 dimensions, recommended)
 - `text-embedding-3-large` (3072 dimensions)
 - `text-embedding-ada-002` (1536 dimensions, legacy)
@@ -227,6 +235,7 @@ const embedding = new VoyageAIEmbedding({
 ```
 
 **Supported Models:**
+
 - `voyage-code-3` (recommended for code)
 - `voyage-3.5`, `voyage-3.5-lite`
 - `voyage-3-large`
@@ -266,12 +275,12 @@ const vectorDatabase = new MilvusRestfulVectorDatabase({
 
 ```typescript
 interface SemanticSearchResult {
-  content: string;        // Code content
-  relativePath: string;   // File path relative to codebase root
-  startLine: number;      // Starting line number
-  endLine: number;        // Ending line number
-  language: string;       // Programming language
-  score: number;          // Similarity score (0-1)
+  content: string; // Code content
+  relativePath: string; // File path relative to codebase root
+  startLine: number; // Starting line number
+  endLine: number; // Ending line number
+  language: string; // Programming language
+  score: number; // Similarity score (0-1)
 }
 ```
 
@@ -291,7 +300,8 @@ const searchContext = new SearchContext({ name: "my-project", ... });
 
 ### Hybrid Mode
 
-By default, hybrid search is enabled (combines dense vectors + BM25 sparse vectors). This provides better search results than dense vectors alone.
+By default, hybrid search is enabled (combines dense vectors + BM25 sparse
+vectors). This provides better search results than dense vectors alone.
 
 To disable hybrid mode:
 
@@ -312,22 +322,23 @@ export HYBRID_MODE=false
 
 ### Limitations
 
-1. **Indexing Not Supported**: Use `@mcampa/ai-context-core` (Node.js) for indexing
+1. **Indexing Not Supported**: Use `@mcampa/ai-context-core` (Node.js) for
+   indexing
 2. **REST API Only**: Milvus gRPC SDK not available in Deno
 3. **No File Operations**: This package only performs searches
 4. **Environment Compatibility**: Requires Deno 1.40+
 
 ## Comparison with Core Package
 
-| Feature | Core (Node.js) | Deno Search |
-|---------|---------------|-------------|
-| Indexing | ✅ | ❌ |
-| Searching | ✅ | ✅ |
-| File Operations | ✅ | ❌ |
-| AST Code Splitting | ✅ | ❌ |
-| Milvus gRPC | ✅ | ❌ |
-| Milvus REST | ✅ | ✅ |
-| Size | ~1500 LOC | ~500 LOC |
+| Feature            | Core (Node.js) | Deno Search |
+| ------------------ | -------------- | ----------- |
+| Indexing           | ✅             | ❌          |
+| Searching          | ✅             | ✅          |
+| File Operations    | ✅             | ❌          |
+| AST Code Splitting | ✅             | ❌          |
+| Milvus gRPC        | ✅             | ❌          |
+| Milvus REST        | ✅             | ✅          |
+| Size               | ~1500 LOC      | ~500 LOC    |
 
 ## Examples
 
@@ -339,7 +350,7 @@ const tsResults = await searchContext.semanticSearch(
   "authentication middleware",
   5,
   0.5,
-  'fileExtension in [".ts", ".tsx"]'
+  'fileExtension in [".ts", ".tsx"]',
 );
 
 // Search in specific directory (requires relativePath in metadata)
@@ -347,7 +358,7 @@ const apiResults = await searchContext.semanticSearch(
   "API endpoint handler",
   10,
   0.6,
-  'relativePath like "src/api/%"'
+  'relativePath like "src/api/%"',
 );
 ```
 
@@ -378,7 +389,7 @@ const ollamaEmbedding = new OllamaEmbedding({
 ```typescript
 try {
   const results = await searchContext.semanticSearch(query);
-  
+
   if (results.length === 0) {
     console.log("No results found. Try a different query.");
   }
@@ -417,13 +428,15 @@ echo $MILVUS_TOKEN
 
 Cannot connect to Milvus/Zilliz Cloud.
 
-**Solution:** Verify your Milvus address and token. Ensure the endpoint includes `https://` if using Zilliz Cloud.
+**Solution:** Verify your Milvus address and token. Ensure the endpoint includes
+`https://` if using Zilliz Cloud.
 
 ### Empty Results
 
 Search returns no results even though code exists.
 
 **Possible causes:**
+
 1. Query is too specific or uses wrong terminology
 2. Threshold is too high (try 0.3-0.5)
 3. Index doesn't contain the expected files
@@ -461,5 +474,5 @@ MIT - See [LICENSE](../../LICENSE) for details.
 
 ## Contributing
 
-Contributions are welcome! Please see the [main repository](../../README.md) for contribution guidelines.
-
+Contributions are welcome! Please see the [main repository](../../README.md) for
+contribution guidelines.

@@ -6,13 +6,13 @@
  */
 
 import type {
-  VectorDocument,
-  SearchOptions,
-  VectorSearchResult,
-  VectorDatabase,
-  HybridSearchRequest,
   HybridSearchOptions,
+  HybridSearchRequest,
   HybridSearchResult,
+  SearchOptions,
+  VectorDatabase,
+  VectorDocument,
+  VectorSearchResult,
 } from "./types.ts";
 import { COLLECTION_LIMIT_MESSAGE } from "./types.ts";
 

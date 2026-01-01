@@ -2,12 +2,12 @@
 export { MilvusRestfulVectorDatabase } from "./milvus-rest.ts";
 export type { MilvusRestfulConfig } from "./milvus-rest.ts";
 export type {
-  VectorDocument,
-  SearchOptions,
-  VectorSearchResult,
-  VectorDatabase,
-  HybridSearchRequest,
   HybridSearchOptions,
+  HybridSearchRequest,
   HybridSearchResult,
   RerankStrategy,
+  SearchOptions,
+  VectorDatabase,
+  VectorDocument,
+  VectorSearchResult,
 } from "./types.ts";

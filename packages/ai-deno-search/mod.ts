@@ -43,15 +43,15 @@ export type { SearchContextConfig } from "./src/search-context.ts";
 
 // Type exports
 export type {
-  SemanticSearchResult,
   EmbeddingVector,
-  VectorDatabase,
+  HybridSearchOptions,
+  HybridSearchRequest,
+  HybridSearchResult,
   SearchOptions,
+  SemanticSearchResult,
+  VectorDatabase,
   VectorDocument,
   VectorSearchResult,
-  HybridSearchRequest,
-  HybridSearchOptions,
-  HybridSearchResult,
 } from "./src/types.ts";
 
 export { Embedding } from "./src/types.ts";
