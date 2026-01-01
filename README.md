@@ -633,11 +633,12 @@ const searchContext = new SearchContext({
 // Perform semantic search
 const results = await searchContext.semanticSearch(
   "function that handles authentication",
-  5
+  5,
 );
 ```
 
 **Key Features:**
+
 - Native Deno support with TypeScript
 - No native dependencies (HTTP/fetch only)
 - Type-safe with shared types from core

@@ -34,8 +34,6 @@
       "path": "./packages/cli"
     }
   ],
-  "exclude": [
-    "packages/ai-deno-search/**/*"
-  ],
+  "exclude": ["packages/ai-deno-search/**/*"],
   "files": []
 }
