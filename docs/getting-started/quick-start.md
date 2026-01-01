@@ -444,7 +444,7 @@ Zencoder offers support for MCP tools and servers in both its JetBrains and VS C
 <details>
 <summary><strong>LangChain/LangGraph</strong></summary>
 
-For LangChain/LangGraph integration examples, see [this example](https://github.com/zilliztech/claude-context/blob/643796a0d30e706a2a0dff3d55621c9b5d831807/evaluation/retrieval/custom.py#L88).
+For LangChain/LangGraph integration examples, see [this example](https://github.com/mcampa/ai-context/blob/643796a0d30e706a2a0dff3d55621c9b5d831807/evaluation/retrieval/custom.py#L88).
 
 </details>
 

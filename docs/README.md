@@ -30,7 +30,7 @@ Welcome to the Claude Context documentation! Claude Context is a powerful tool t
 
 ## 🔗 External Resources
 
-- [GitHub Repository](https://github.com/zilliztech/claude-context)
+- [GitHub Repository](https://github.com/mcampa/ai-context)
 - [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=zilliz.semanticcodesearch)
 - [npm - Core Package](https://www.npmjs.com/package/@mcampa/ai-context-core)
 - [npm - MCP Server](https://www.npmjs.com/package/@mcampa/ai-context-mcp)

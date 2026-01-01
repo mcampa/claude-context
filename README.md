@@ -427,7 +427,7 @@ Zencoder offers support for MCP tools and servers in both its JetBrains and VS C
 <details>
 <summary><strong>LangChain/LangGraph</strong></summary>
 
-For LangChain/LangGraph integration examples, see [this example](https://github.com/zilliztech/claude-context/blob/643796a0d30e706a2a0dff3d55621c9b5d831807/evaluation/retrieval/custom.py#L88).
+For LangChain/LangGraph integration examples, see [this example](https://github.com/mcampa/ai-context/blob/643796a0d30e706a2a0dff3d55621c9b5d831807/evaluation/retrieval/custom.py#L88).
 
 </details>
 
@@ -623,7 +623,7 @@ Integrates Claude Context directly into your IDE. Provides an intuitive interfac
 
 ```bash
 # Clone repository
-git clone https://github.com/zilliztech/claude-context.git
+git clone https://github.com/mcampa/ai-context.git
 cd claude-context
 
 # Install dependencies
@@ -646,7 +646,7 @@ On Windows, ensure you have:
 
 ```powershell
 # Windows PowerShell/Command Prompt
-git clone https://github.com/zilliztech/claude-context.git
+git clone https://github.com/zilliztech/ai-context.git
 cd claude-context
 
 # Configure git line endings (recommended)
@@ -749,7 +749,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/zilliztech/claude-context)
+- [GitHub Repository](https://github.com/mcampa/ai-context)
 - [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=zilliz.semanticcodesearch)
 - [Milvus Documentation](https://milvus.io/docs)
 - [Zilliz Cloud](https://zilliz.com/cloud)

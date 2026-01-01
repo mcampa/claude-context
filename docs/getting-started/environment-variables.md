@@ -34,19 +34,19 @@ Claude Context supports a global configuration file at `~/.context/.env` to simp
 
 > **Supported Model Names:**
 >
-> - OpenAI Models: See `getSupportedModels` in [`openai-embedding.ts`](https://github.com/zilliztech/claude-context/blob/master/packages/core/src/embedding/openai-embedding.ts) for the full list of supported models.
-> - VoyageAI Models: See `getSupportedModels` in [`voyageai-embedding.ts`](https://github.com/zilliztech/claude-context/blob/master/packages/core/src/embedding/voyageai-embedding.ts) for the full list of supported models.
-> - Gemini Models: See `getSupportedModels` in [`gemini-embedding.ts`](https://github.com/zilliztech/claude-context/blob/master/packages/core/src/embedding/gemini-embedding.ts) for the full list of supported models.
+> - OpenAI Models: See `getSupportedModels` in [`openai-embedding.ts`](https://github.com/mcampa/ai-context/blob/master/packages/core/src/embedding/openai-embedding.ts) for the full list of supported models.
+> - VoyageAI Models: See `getSupportedModels` in [`voyageai-embedding.ts`](https://github.com/mcampa/ai-context/blob/master/packages/core/src/embedding/voyageai-embedding.ts) for the full list of supported models.
+> - Gemini Models: See `getSupportedModels` in [`gemini-embedding.ts`](https://github.com/mcampa/ai-context/blob/master/packages/core/src/embedding/gemini-embedding.ts) for the full list of supported models.
 > - Ollama Models: Depends on the model you install locally.
 
 > **📖 For detailed provider-specific configuration examples and setup instructions, see the [MCP Configuration Guide](../../packages/mcp/README.md#embedding-provider-configuration).**
 
 ### Vector Database
 
-| Variable         | Description                                                                                                                                           | Default                  |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `MILVUS_TOKEN`   | Milvus authentication token. Get [Zilliz Personal API Key](https://github.com/zilliztech/claude-context/blob/master/assets/signup_and_get_apikey.png) | Recommended              |
-| `MILVUS_ADDRESS` | Milvus server address. Optional when using Zilliz Personal API Key                                                                                    | Auto-resolved from token |
+| Variable         | Description                                                                                                                                   | Default                  |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `MILVUS_TOKEN`   | Milvus authentication token. Get [Zilliz Personal API Key](https://github.com/mcampa/ai-context/blob/master/assets/signup_and_get_apikey.png) | Recommended              |
+| `MILVUS_ADDRESS` | Milvus server address. Optional when using Zilliz Personal API Key                                                                            | Auto-resolved from token |
 
 ### Ollama (Optional)
 
