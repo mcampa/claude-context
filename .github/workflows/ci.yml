@@ -38,8 +38,8 @@ jobs:
       - name: Check code formatting
         run: pnpm format:check
 
-      # - name: Lint code
-      #   run: pnpm lint
+      - name: Lint code
+        run: pnpm lint
 
       - name: Build packages
         run: pnpm build

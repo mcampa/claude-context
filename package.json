@@ -7,18 +7,18 @@
     "build": "pnpm -r build",
     "build:core": "pnpm --filter @mcampa/ai-context-core build",
     "build:mcp": "pnpm --filter @mcampa/ai-context-mcp build",
+    "build:cli": "pnpm --filter @mcampa/ai-context-cli build",
     "dev": "pnpm -r dev",
     "dev:core": "pnpm --filter @mcampa/ai-context-core dev",
     "dev:mcp": "pnpm --filter @mcampa/ai-context-mcp dev",
+    "dev:cli": "pnpm --filter @mcampa/ai-context-cli dev",
     "clean": "pnpm -r clean",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r run lint:fix",
     "test": "pnpm -r run test",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "typecheck": "pnpm -r run typecheck",
-    "release:core": "pnpm --filter @mcampa/ai-context-core... run build && pnpm --filter @mcampa/ai-context-core publish --access public --no-git-checks",
-    "release:mcp": "pnpm --filter @mcampa/ai-context-mcp... run build && pnpm --filter @mcampa/ai-context-mcp publish --access public --no-git-checks"
+    "typecheck": "pnpm -r run typecheck"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
