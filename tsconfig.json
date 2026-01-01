@@ -19,8 +19,8 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "paths": {
-      "@mcampa/claude-context-core": ["./packages/core/src"],
-      "@mcampa/claude-context-core/*": ["./packages/core/src/*"]
+      "@mcampa/ai-context-core": ["./packages/core/src"],
+      "@mcampa/ai-context-core/*": ["./packages/core/src/*"]
     }
   },
   "references": [
@@ -28,13 +28,10 @@
       "path": "./packages/core"
     },
     {
-      "path": "./packages/vscode-extension"
-    },
-    {
-      "path": "./packages/chrome-extension"
-    },
-    {
       "path": "./packages/mcp"
+    },
+    {
+      "path": "./packages/cli"
     }
   ],
   "files": []

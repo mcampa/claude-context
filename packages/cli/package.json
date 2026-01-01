@@ -1,11 +1,13 @@
 {
-  "name": "@mcampa/ai-context-mcp",
+  "name": "@mcampa/ai-context-cli",
   "version": "0.0.1",
-  "description": "Model Context Protocol integration for Claude Context",
+  "description": "CLI tool for indexing codebases with AI Context",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": "dist/index.js",
+  "bin": {
+    "ai-context-index": "./bin/ai-context-index.js"
+  },
   "scripts": {
     "build": "pnpm clean && tsc --build --force",
     "dev": "tsx --watch src/index.ts",
@@ -13,31 +15,37 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "start": "tsx src/index.ts",
-    "start:with-env": "OPENAI_API_KEY=${OPENAI_API_KEY:your-api-key-here} MILVUS_ADDRESS=${MILVUS_ADDRESS:localhost:19530} tsx src/index.ts",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@mcampa/ai-context-core": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "zod": "^3.25.55"
+    "commander": "^12.1.0",
+    "tsx": "^4.19.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "tsx": "^4.19.4",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.0"
   },
   "files": [
     "dist",
+    "bin",
     "README.md"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/mcampa/claude-context.git",
-    "directory": "packages/mcp"
+    "directory": "packages/cli"
   },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

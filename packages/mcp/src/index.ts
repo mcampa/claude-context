@@ -21,8 +21,8 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { Context } from "@mcampa/claude-context-core";
-import { MilvusVectorDatabase } from "@mcampa/claude-context-core";
+import { Context } from "@mcampa/ai-context-core";
+import { MilvusVectorDatabase } from "@mcampa/ai-context-core";
 
 // Import our modular components
 import {

@@ -3,7 +3,7 @@ import {
   VoyageAIEmbedding,
   GeminiEmbedding,
   OllamaEmbedding,
-} from "@mcampa/claude-context-core";
+} from "@mcampa/ai-context-core";
 import { ContextMcpConfig } from "./config.js";
 
 // Helper function to create embedding instance based on provider

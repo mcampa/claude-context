@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Context, COLLECTION_LIMIT_MESSAGE } from "@mcampa/claude-context-core";
+import { Context, COLLECTION_LIMIT_MESSAGE } from "@mcampa/ai-context-core";
 import { SnapshotManager } from "./snapshot.js";
 import {
   ensureAbsolutePath,
@@ -471,7 +471,7 @@ export class ToolHandlers {
       await this.context.getLoadedIgnorePatterns(absolutePath);
 
       // Initialize file synchronizer with proper ignore patterns (including project-specific patterns)
-      const { FileSynchronizer } = await import("@mcampa/claude-context-core");
+      const { FileSynchronizer } = await import("@mcampa/ai-context-core");
       const ignorePatterns = this.context.getIgnorePatterns() || [];
       console.log(
         `[BACKGROUND-INDEX] Using ignore patterns: ${ignorePatterns.join(", ")}`,
