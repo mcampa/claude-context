@@ -1,0 +1,21 @@
+{
+  "name": "@mcampa/ai-deno-search",
+  "version": "0.0.1",
+  "exports": "./mod.ts",
+  "compilerOptions": {
+    "lib": ["deno.window", "es2022"],
+    "strict": true
+  },
+  "imports": {
+    "openai": "npm:openai@^5.1.1",
+    "voyageai": "npm:voyageai@^0.0.4",
+    "@google/genai": "npm:@google/genai@^1.9.0",
+    "ollama": "npm:ollama@^0.5.16"
+  },
+  "tasks": {
+    "test": "deno test --allow-read --allow-net --allow-env",
+    "check": "deno check mod.ts",
+    "example": "deno run --allow-env --allow-net examples/basic-search.ts"
+  }
+}
+

@@ -1,0 +1,187 @@
+import { VoyageAIClient } from "voyageai";
+import { Embedding, type EmbeddingVector } from "../types.ts";
+
+export interface VoyageAIEmbeddingConfig {
+  model: string;
+  apiKey: string;
+}
+
+export class VoyageAIEmbedding extends Embedding {
+  private client: VoyageAIClient;
+  private config: VoyageAIEmbeddingConfig;
+  private dimension: number = 1024;
+  private inputType: "document" | "query" = "document";
+  protected maxTokens: number = 32000;
+
+  constructor(config: VoyageAIEmbeddingConfig) {
+    super();
+    this.config = config;
+    this.client = new VoyageAIClient({
+      apiKey: config.apiKey,
+    });
+
+    this.updateModelSettings(config.model || "voyage-code-3");
+  }
+
+  private updateModelSettings(model: string): void {
+    const supportedModels = VoyageAIEmbedding.getSupportedModels();
+    const modelInfo = supportedModels[model];
+
+    if (modelInfo) {
+      if (typeof modelInfo.dimension === "string") {
+        this.dimension = 1024;
+      } else {
+        this.dimension = modelInfo.dimension;
+      }
+      this.maxTokens = modelInfo.contextLength;
+    } else {
+      this.dimension = 1024;
+      this.maxTokens = 32000;
+    }
+  }
+
+  async detectDimension(): Promise<number> {
+    return this.dimension;
+  }
+
+  async embed(text: string): Promise<EmbeddingVector> {
+    const processedText = this.preprocessText(text);
+    const model = this.config.model || "voyage-code-3";
+
+    const response = await this.client.embed({
+      input: processedText,
+      model: model,
+      inputType: this.inputType,
+    });
+
+    if (!response.data || !response.data[0] || !response.data[0].embedding) {
+      throw new Error("VoyageAI API returned invalid response");
+    }
+
+    return {
+      vector: response.data[0].embedding,
+      dimension: this.dimension,
+    };
+  }
+
+  async embedBatch(texts: string[]): Promise<EmbeddingVector[]> {
+    const processedTexts = this.preprocessTexts(texts);
+    const model = this.config.model || "voyage-code-3";
+
+    const response = await this.client.embed({
+      input: processedTexts,
+      model: model,
+      inputType: this.inputType,
+    });
+
+    if (!response.data) {
+      throw new Error("VoyageAI API returned invalid response");
+    }
+
+    return response.data.map((item) => {
+      if (!item.embedding) {
+        throw new Error("VoyageAI API returned invalid embedding data");
+      }
+      return {
+        vector: item.embedding,
+        dimension: this.dimension,
+      };
+    });
+  }
+
+  getDimension(): number {
+    return this.dimension;
+  }
+
+  getProvider(): string {
+    return "VoyageAI";
+  }
+
+  setModel(model: string): void {
+    this.config.model = model;
+    this.updateModelSettings(model);
+  }
+
+  setInputType(inputType: "document" | "query"): void {
+    this.inputType = inputType;
+  }
+
+  getClient(): VoyageAIClient {
+    return this.client;
+  }
+
+  static getSupportedModels(): Record<
+    string,
+    { dimension: number | string; contextLength: number; description: string }
+  > {
+    return {
+      "voyage-3-large": {
+        dimension: "1024 (default), 256, 512, 2048",
+        contextLength: 32000,
+        description:
+          "The best general-purpose and multilingual retrieval quality",
+      },
+      "voyage-3.5": {
+        dimension: "1024 (default), 256, 512, 2048",
+        contextLength: 32000,
+        description:
+          "Optimized for general-purpose and multilingual retrieval quality",
+      },
+      "voyage-3.5-lite": {
+        dimension: "1024 (default), 256, 512, 2048",
+        contextLength: 32000,
+        description: "Optimized for latency and cost",
+      },
+      "voyage-code-3": {
+        dimension: "1024 (default), 256, 512, 2048",
+        contextLength: 32000,
+        description: "Optimized for code retrieval (recommended for code)",
+      },
+      "voyage-finance-2": {
+        dimension: 1024,
+        contextLength: 32000,
+        description: "Optimized for finance retrieval and RAG",
+      },
+      "voyage-law-2": {
+        dimension: 1024,
+        contextLength: 16000,
+        description: "Optimized for legal retrieval and RAG",
+      },
+      "voyage-multilingual-2": {
+        dimension: 1024,
+        contextLength: 32000,
+        description: "Legacy: Use voyage-3.5 for multilingual tasks",
+      },
+      "voyage-large-2-instruct": {
+        dimension: 1024,
+        contextLength: 16000,
+        description: "Legacy: Use voyage-3.5 instead",
+      },
+      "voyage-large-2": {
+        dimension: 1536,
+        contextLength: 16000,
+        description: "Legacy: Use voyage-3.5 instead",
+      },
+      "voyage-code-2": {
+        dimension: 1536,
+        contextLength: 16000,
+        description: "Previous generation of code embeddings",
+      },
+      "voyage-3": {
+        dimension: 1024,
+        contextLength: 32000,
+        description: "Legacy: Use voyage-3.5 instead",
+      },
+      "voyage-3-lite": {
+        dimension: 512,
+        contextLength: 32000,
+        description: "Legacy: Use voyage-3.5-lite instead",
+      },
+      "voyage-2": {
+        dimension: 1024,
+        contextLength: 4000,
+        description: "Legacy: Use voyage-3.5-lite instead",
+      },
+    };
+  }
+}

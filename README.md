@@ -532,9 +532,10 @@ For detailed evaluation methodology and results, see the [evaluation directory](
 
 ### Core Components
 
-Claude Context is a monorepo containing three main packages:
+Claude Context is a monorepo containing four main packages:
 
-- **`@mcampa/ai-context-core`**: Core indexing engine with embedding and vector database integration
+- **`@mcampa/ai-context-core`**: Core indexing engine with embedding and vector database integration (Node.js)
+- **`@mcampa/ai-deno-search`**: Lightweight search-only package for Deno applications
 - **VSCode Extension**: Semantic Code Search extension for Visual Studio Code
 - **`@mcampa/ai-context-mcp`**: Model Context Protocol server for AI agent integration
 
@@ -544,6 +545,7 @@ Claude Context is a monorepo containing three main packages:
 - **Vector Databases**: [Milvus](https://milvus.io) or [Zilliz Cloud](https://zilliz.com/cloud)(fully managed vector database as a service)
 - **Code Splitters**: AST-based splitter (with automatic fallback), LangChain character-based splitter
 - **Languages**: TypeScript, JavaScript, Python, Java, C++, C#, Go, Rust, PHP, Ruby, Swift, Kotlin, Scala, Markdown
+- **Runtime Support**: Node.js, Deno
 - **Development Tools**: VSCode, Model Context Protocol
 
 ---
@@ -597,6 +599,51 @@ results.forEach((result) => {
   console.log(`Content: ${result.content.substring(0, 100)}...`);
 });
 ```
+
+### Search from Deno with Deno Search Package
+
+The `@mcampa/ai-deno-search` package provides search-only functionality for Deno applications. Perfect for searching codebases indexed with the core package.
+
+```typescript
+import {
+  SearchContext,
+  OpenAIEmbedding,
+  MilvusRestfulVectorDatabase,
+} from "@mcampa/ai-deno-search";
+
+// Initialize embedding provider
+const embedding = new OpenAIEmbedding({
+  apiKey: Deno.env.get("OPENAI_API_KEY")!,
+  model: "text-embedding-3-small",
+});
+
+// Initialize vector database (REST API)
+const vectorDatabase = new MilvusRestfulVectorDatabase({
+  address: Deno.env.get("MILVUS_ADDRESS")!,
+  token: Deno.env.get("MILVUS_TOKEN")!,
+});
+
+// Create search context (must match indexing name)
+const searchContext = new SearchContext({
+  name: "my-project",
+  embedding,
+  vectorDatabase,
+});
+
+// Perform semantic search
+const results = await searchContext.semanticSearch(
+  "function that handles authentication",
+  5
+);
+```
+
+**Key Features:**
+- Native Deno support with TypeScript
+- No native dependencies (HTTP/fetch only)
+- Type-safe with shared types from core
+- Search-only (use core package for indexing)
+
+See [packages/ai-deno-search](packages/ai-deno-search) for full documentation.
 
 ### VSCode Extension
 
