@@ -2,6 +2,7 @@
   "name": "@mcampa/ai-deno-search",
   "version": "0.0.1",
   "exports": "./mod.ts",
+  "license": "MIT",
   "compilerOptions": {
     "lib": ["deno.window", "es2022"],
     "strict": true
