@@ -1,10 +1,8 @@
 name: Beta Release
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
-    branches: [main]
+  push:
+    branches: [master]
 
 permissions:
   contents: read
@@ -13,14 +11,10 @@ permissions:
 jobs:
   publish-beta:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -43,7 +37,7 @@ jobs:
 
       - name: Set beta versions
         run: |
-          SHORT_SHA=${{ github.event.workflow_run.head_sha }}
+          SHORT_SHA=${{ github.sha }}
           SHORT_SHA=${SHORT_SHA::7}
           
           # Get current versions from each package
