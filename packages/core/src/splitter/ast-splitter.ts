@@ -1,5 +1,6 @@
 import Parser from "tree-sitter";
 import { Splitter, CodeChunk } from "./index";
+import type { LangChainCodeSplitter } from "./langchain-splitter";
 
 // Language parsers
 const JavaScript = require("tree-sitter-javascript");
@@ -78,11 +79,19 @@ const SPLITTABLE_NODE_TYPES = {
   ],
 };
 
+// Language config type for tree-sitter parsers
+// The parser type is the result of require('tree-sitter-*') which returns an object
+// that can be passed to Parser.setLanguage()
+interface LanguageConfig {
+  parser: ReturnType<typeof require>;
+  nodeTypes: string[];
+}
+
 export class AstCodeSplitter implements Splitter {
   private chunkSize: number = 2500;
   private chunkOverlap: number = 300;
   private parser: Parser;
-  private langchainFallback: any; // LangChainCodeSplitter for fallback
+  private langchainFallback: LangChainCodeSplitter;
 
   constructor(chunkSize?: number, chunkOverlap?: number) {
     if (chunkSize) this.chunkSize = chunkSize;
@@ -154,10 +163,8 @@ export class AstCodeSplitter implements Splitter {
     this.langchainFallback.setChunkOverlap(chunkOverlap);
   }
 
-  private getLanguageConfig(
-    language: string,
-  ): { parser: any; nodeTypes: string[] } | null {
-    const langMap: Record<string, { parser: any; nodeTypes: string[] }> = {
+  private getLanguageConfig(language: string): LanguageConfig | null {
+    const langMap: Record<string, LanguageConfig> = {
       javascript: {
         parser: JavaScript,
         nodeTypes: SPLITTABLE_NODE_TYPES.javascript,

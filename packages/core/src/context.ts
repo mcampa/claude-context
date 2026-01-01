@@ -624,7 +624,7 @@ export class Context {
         relativePath: result.document.relativePath,
         startLine: result.document.startLine,
         endLine: result.document.endLine,
-        language: result.document.metadata.language || "unknown",
+        language: String(result.document.metadata.language || "unknown"),
         score: result.score,
       }));
 
@@ -657,7 +657,7 @@ export class Context {
         relativePath: result.document.relativePath,
         startLine: result.document.startLine,
         endLine: result.document.endLine,
-        language: result.document.metadata.language || "unknown",
+        language: String(result.document.metadata.language || "unknown"),
         score: result.score,
       }));
 

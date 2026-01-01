@@ -30,8 +30,13 @@ export class SnapshotManager {
   /**
    * Check if snapshot is v2 format
    */
-  private isV2Format(snapshot: any): snapshot is CodebaseSnapshotV2 {
-    return snapshot && snapshot.formatVersion === "v2";
+  private isV2Format(snapshot: unknown): snapshot is CodebaseSnapshotV2 {
+    return (
+      typeof snapshot === "object" &&
+      snapshot !== null &&
+      "formatVersion" in snapshot &&
+      (snapshot as { formatVersion: unknown }).formatVersion === "v2"
+    );
   }
 
   /**

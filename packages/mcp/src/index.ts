@@ -245,13 +245,29 @@ This tool is versatile and can be used before completing various tasks to retrie
 
       switch (name) {
         case "index_codebase":
-          return await this.toolHandlers.handleIndexCodebase(args);
+          return await this.toolHandlers.handleIndexCodebase(
+            (args || {}) as unknown as Parameters<
+              typeof this.toolHandlers.handleIndexCodebase
+            >[0],
+          );
         case "search_code":
-          return await this.toolHandlers.handleSearchCode(args);
+          return await this.toolHandlers.handleSearchCode(
+            (args || {}) as unknown as Parameters<
+              typeof this.toolHandlers.handleSearchCode
+            >[0],
+          );
         case "clear_index":
-          return await this.toolHandlers.handleClearIndex(args);
+          return await this.toolHandlers.handleClearIndex(
+            (args || {}) as unknown as Parameters<
+              typeof this.toolHandlers.handleClearIndex
+            >[0],
+          );
         case "get_indexing_status":
-          return await this.toolHandlers.handleGetIndexingStatus(args);
+          return await this.toolHandlers.handleGetIndexingStatus(
+            (args || {}) as unknown as Parameters<
+              typeof this.toolHandlers.handleGetIndexingStatus
+            >[0],
+          );
 
         default:
           throw new Error(`Unknown tool: ${name}`);

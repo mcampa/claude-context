@@ -29,6 +29,30 @@ export interface MilvusRestfulConfig {
   database?: string;
 }
 
+// REST API request/response types
+interface MilvusRestResponse<T = unknown> {
+  code: number;
+  data?: T;
+  message?: string;
+}
+
+interface MilvusSearchResultItem {
+  id: string;
+  distance?: number;
+  score?: number;
+  relativePath?: string;
+  content?: string;
+  startLine?: number;
+  endLine?: number;
+  fileExtension?: string;
+  metadata?: string;
+  [key: string]: unknown;
+}
+
+interface CollectionLoadState {
+  loadState: string;
+}
+
 /**
  * TODO: Change this usage to checkCollectionLimit()
  * Wrapper function to handle collection creation with limit detection
@@ -38,9 +62,9 @@ async function createCollectionWithLimitCheck(
   makeRequestFn: (
     endpoint: string,
     method: "GET" | "POST",
-    data?: any,
-  ) => Promise<any>,
-  collectionSchema: any,
+    data?: Record<string, unknown>,
+  ) => Promise<MilvusRestResponse>,
+  collectionSchema: Record<string, unknown>,
 ): Promise<void> {
   try {
     await makeRequestFn("/collections/create", "POST", collectionSchema);
@@ -142,7 +166,8 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         },
       );
 
-      const loadState = response.data?.loadState;
+      const responseData = response.data as CollectionLoadState | undefined;
+      const loadState = responseData?.loadState;
       if (loadState !== "LoadStateLoaded") {
         console.log(
           `[MilvusRestfulDB] 🔄 Loading collection '${collectionName}' to memory...`,
@@ -164,8 +189,8 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
   private async makeRequest(
     endpoint: string,
     method: "GET" | "POST" = "POST",
-    data?: any,
-  ): Promise<any> {
+    data?: Record<string, unknown>,
+  ): Promise<MilvusRestResponse> {
     const url = `${this.baseUrl}${endpoint}`;
 
     const headers: Record<string, string> = {
@@ -197,7 +222,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const result: any = await response.json();
+      const result = (await response.json()) as MilvusRestResponse;
 
       if (result.code !== 0 && result.code !== 200) {
         throw new Error(
@@ -381,7 +406,8 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         dbName: restfulConfig.database,
       });
 
-      const exists = response.data?.has || false;
+      const responseData = response.data as { has?: boolean } | undefined;
+      const exists = responseData?.has || false;
       return exists;
     } catch (error) {
       console.error(
@@ -401,7 +427,8 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         dbName: restfulConfig.database,
       });
 
-      return response.data || [];
+      const collections = response.data as string[] | undefined;
+      return collections || [];
     } catch (error) {
       console.error(`[MilvusRestfulDB] ❌ Failed to list collections:`, error);
       throw error;
@@ -458,7 +485,16 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
     try {
       const restfulConfig = this.config as MilvusRestfulConfig;
       // Build search request according to Milvus REST API specification
-      const searchRequest: any = {
+      const searchRequest: {
+        collectionName: string;
+        dbName?: string;
+        data: number[][];
+        annsField: string;
+        limit: number;
+        outputFields: string[];
+        searchParams: { metricType: string; params: Record<string, unknown> };
+        filter?: string;
+      } = {
         collectionName,
         dbName: restfulConfig.database,
         data: [queryVector], // Array of query vectors
@@ -486,39 +522,38 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
       const response = await this.makeRequest(
         "/entities/search",
         "POST",
-        searchRequest,
+        searchRequest as unknown as Record<string, unknown>,
       );
 
       // Transform response to VectorSearchResult format
-      const results: VectorSearchResult[] = (response.data || []).map(
-        (item: any) => {
-          // Parse metadata from JSON string
-          let metadata = {};
-          try {
-            metadata = JSON.parse(item.metadata || "{}");
-          } catch (error) {
-            console.warn(
-              `[MilvusRestfulDB] Failed to parse metadata for item ${item.id}:`,
-              error,
-            );
-            metadata = {};
-          }
+      const searchData = (response.data || []) as MilvusSearchResultItem[];
+      const results: VectorSearchResult[] = searchData.map((item) => {
+        // Parse metadata from JSON string
+        let metadata = {};
+        try {
+          metadata = JSON.parse(item.metadata || "{}");
+        } catch (error) {
+          console.warn(
+            `[MilvusRestfulDB] Failed to parse metadata for item ${item.id}:`,
+            error,
+          );
+          metadata = {};
+        }
 
-          return {
-            document: {
-              id: item.id?.toString() || "",
-              vector: queryVector, // Vector not returned in search results
-              content: item.content || "",
-              relativePath: item.relativePath || "",
-              startLine: item.startLine || 0,
-              endLine: item.endLine || 0,
-              fileExtension: item.fileExtension || "",
-              metadata: metadata,
-            },
-            score: item.distance || 0,
-          };
-        },
-      );
+        return {
+          document: {
+            id: item.id?.toString() || "",
+            vector: queryVector, // Vector not returned in search results
+            content: item.content || "",
+            relativePath: item.relativePath || "",
+            startLine: item.startLine || 0,
+            endLine: item.endLine || 0,
+            fileExtension: item.fileExtension || "",
+            metadata: metadata,
+          },
+          score: item.distance || 0,
+        };
+      });
 
       return results;
     } catch (error) {
@@ -561,7 +596,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
     filter: string,
     outputFields: string[],
     limit?: number,
-  ): Promise<Record<string, any>[]> {
+  ): Promise<Record<string, unknown>[]> {
     await this.ensureInitialized();
     await this.ensureLoaded(collectionName);
 
@@ -588,7 +623,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         );
       }
 
-      return response.data || [];
+      return (response.data || []) as Record<string, unknown>[];
     } catch (error) {
       console.error(
         `[MilvusRestfulDB] ❌ Failed to query collection '${collectionName}':`,
@@ -808,31 +843,35 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
 
       // Prepare search requests according to Milvus REST API hybrid search specification
       // For dense vector search - data must be array of vectors: [[0.1, 0.2, 0.3, ...]]
-      const search_param_1: any = {
-        data: Array.isArray(searchRequests[0].data)
-          ? [searchRequests[0].data]
-          : [[searchRequests[0].data]],
+      const denseData = searchRequests[0].data;
+      const search_param_1 = {
+        data: Array.isArray(denseData) ? [denseData] : [[denseData]],
         annsField: searchRequests[0].anns_field, // "vector"
         limit: searchRequests[0].limit,
         outputFields: ["*"],
         searchParams: {
           metricType: "COSINE",
-          params: searchRequests[0].param || { nprobe: 10 },
+          params: (searchRequests[0].param as Record<string, unknown>) || {
+            nprobe: 10,
+          },
         },
+        filter: undefined as string | undefined,
       };
 
       // For sparse vector search - data must be array of queries: ["query text"]
-      const search_param_2: any = {
-        data: Array.isArray(searchRequests[1].data)
-          ? searchRequests[1].data
-          : [searchRequests[1].data],
+      const sparseData = searchRequests[1].data;
+      const search_param_2 = {
+        data: typeof sparseData === "string" ? [sparseData] : sparseData,
         annsField: searchRequests[1].anns_field, // "sparse_vector"
         limit: searchRequests[1].limit,
         outputFields: ["*"],
         searchParams: {
           metricType: "BM25",
-          params: searchRequests[1].param || { drop_ratio_search: 0.2 },
+          params: (searchRequests[1].param as Record<string, unknown>) || {
+            drop_ratio_search: 0.2,
+          },
         },
+        filter: undefined as string | undefined,
       };
 
       // Apply filter to both search parameters if provided
@@ -880,7 +919,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         ),
       );
 
-      const hybridSearchRequest: any = {
+      const hybridSearchRequest = {
         collectionName,
         dbName: restfulConfig.database,
         search: [search_param_1, search_param_2],
@@ -901,7 +940,7 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
       const response = await this.makeRequest(
         "/entities/hybrid_search",
         "POST",
-        hybridSearchRequest,
+        hybridSearchRequest as unknown as Record<string, unknown>,
       );
 
       if (response.code !== 0) {
@@ -910,23 +949,25 @@ export class MilvusRestfulVectorDatabase implements VectorDatabase {
         );
       }
 
-      const results = response.data || [];
+      const results = (response.data || []) as MilvusSearchResultItem[];
       console.log(
         `[MilvusRestfulDB] ✅ Found ${results.length} results from hybrid search`,
       );
 
       // Transform response to HybridSearchResult format
-      return results.map((result: any) => ({
+      return results.map((result) => ({
         document: {
-          id: result.id,
-          content: result.content,
-          vector: [], // Vector not returned in search results
-          sparse_vector: [], // Vector not returned in search results
-          relativePath: result.relativePath,
-          startLine: result.startLine,
-          endLine: result.endLine,
-          fileExtension: result.fileExtension,
-          metadata: JSON.parse(result.metadata || "{}"),
+          id: result.id || "",
+          content: result.content || "",
+          vector: [],
+          relativePath: result.relativePath || "",
+          startLine: result.startLine || 0,
+          endLine: result.endLine || 0,
+          fileExtension: result.fileExtension || "",
+          metadata: JSON.parse(result.metadata || "{}") as Record<
+            string,
+            unknown
+          >,
         },
         score: result.score || result.distance || 0,
       }));

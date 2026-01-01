@@ -1,12 +1,40 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Context, COLLECTION_LIMIT_MESSAGE } from "@mcampa/ai-context-core";
+import {
+  Context,
+  COLLECTION_LIMIT_MESSAGE,
+  SemanticSearchResult,
+} from "@mcampa/ai-context-core";
 import { SnapshotManager } from "./snapshot.js";
 import {
   ensureAbsolutePath,
   truncateContent,
   trackCodebasePath,
 } from "./utils.js";
+
+// Handler argument types
+interface IndexCodebaseArgs {
+  path: string;
+  force?: boolean;
+  splitter?: "ast" | "langchain";
+  customExtensions?: string[];
+  ignorePatterns?: string[];
+}
+
+interface SearchCodeArgs {
+  path: string;
+  query: string;
+  limit?: number;
+  extensionFilter?: string[];
+}
+
+interface ClearIndexArgs {
+  path?: string;
+}
+
+interface GetIndexingStatusArgs {
+  path: string;
+}
 
 export class ToolHandlers {
   private context: Context;
@@ -100,9 +128,12 @@ export class ToolHandlers {
             const firstResult = results[0];
             const metadataStr = firstResult.metadata;
 
-            if (metadataStr) {
+            if (metadataStr && typeof metadataStr === "string") {
               try {
-                const metadata = JSON.parse(metadataStr);
+                const metadata = JSON.parse(metadataStr) as Record<
+                  string,
+                  unknown
+                >;
                 const codebasePath = metadata.codebasePath;
 
                 if (codebasePath && typeof codebasePath === "string") {
@@ -131,10 +162,12 @@ export class ToolHandlers {
               `[SYNC-CLOUD] ℹ️  Collection ${collectionName} is empty`,
             );
           }
-        } catch (collectionError: any) {
+        } catch (collectionError) {
           console.warn(
             `[SYNC-CLOUD] ⚠️  Error checking collection ${collectionName}:`,
-            collectionError.message || collectionError,
+            collectionError instanceof Error
+              ? collectionError.message
+              : String(collectionError),
           );
           // Continue with next collection
         }
@@ -189,7 +222,7 @@ export class ToolHandlers {
     }
   }
 
-  public async handleIndexCodebase(args: any) {
+  public async handleIndexCodebase(args: IndexCodebaseArgs) {
     const {
       path: codebasePath,
       force,
@@ -332,7 +365,7 @@ export class ToolHandlers {
         console.log(
           `[INDEX-VALIDATION] ✅  Collection creation validation completed`,
         );
-      } catch (validationError: any) {
+      } catch (validationError) {
         // Handle other collection creation errors
         console.error(
           `[INDEX-VALIDATION] ❌ Collection creation validation failed:`,
@@ -343,7 +376,9 @@ export class ToolHandlers {
             {
               type: "text",
               text: `Error validating collection creation: ${
-                validationError.message || validationError
+                validationError instanceof Error
+                  ? validationError.message
+                  : String(validationError)
               }`,
             },
           ],
@@ -375,13 +410,13 @@ export class ToolHandlers {
       const currentStatus =
         this.snapshotManager.getCodebaseStatus(absolutePath);
       if (currentStatus === "indexfailed") {
-        const failedInfo = this.snapshotManager.getCodebaseInfo(
-          absolutePath,
-        ) as any;
+        const failedInfo = this.snapshotManager.getCodebaseInfo(absolutePath);
+        const errorMessage =
+          failedInfo?.status === "indexfailed"
+            ? failedInfo.errorMessage
+            : "Unknown error";
         console.log(
-          `[BACKGROUND-INDEX] Retrying indexing for previously failed codebase. Previous error: ${
-            failedInfo?.errorMessage || "Unknown error"
-          }`,
+          `[BACKGROUND-INDEX] Retrying indexing for previously failed codebase. Previous error: ${errorMessage}`,
         );
       }
 
@@ -576,7 +611,7 @@ export class ToolHandlers {
     }
   }
 
-  public async handleSearchCode(args: any) {
+  public async handleSearchCode(args: SearchCodeArgs) {
     const { path: codebasePath, query, limit = 10, extensionFilter } = args;
     const resultLimit = limit || 10;
 
@@ -661,9 +696,9 @@ export class ToolHandlers {
       let filterExpr: string | undefined = undefined;
       if (Array.isArray(extensionFilter) && extensionFilter.length > 0) {
         const cleaned = extensionFilter
-          .filter((v: any) => typeof v === "string")
-          .map((v: string) => v.trim())
-          .filter((v: string) => v.length > 0);
+          .filter((v): v is string => typeof v === "string")
+          .map((v) => v.trim())
+          .filter((v) => v.length > 0);
         const invalid = cleaned.filter(
           (e: string) => !(e.startsWith(".") && e.length > 1 && !/\s/.test(e)),
         );
@@ -715,7 +750,7 @@ export class ToolHandlers {
 
       // Format results
       const formattedResults = searchResults
-        .map((result: any, index: number) => {
+        .map((result: SemanticSearchResult, index: number) => {
           const location = `${result.relativePath}:${result.startLine}-${result.endLine}`;
           const context = truncateContent(result.content, 5000);
           const codebaseInfo = path.basename(absolutePath);
@@ -783,7 +818,7 @@ export class ToolHandlers {
     }
   }
 
-  public async handleClearIndex(args: any) {
+  public async handleClearIndex(args: ClearIndexArgs) {
     const { path: codebasePath } = args;
 
     if (
@@ -797,6 +832,18 @@ export class ToolHandlers {
             text: "No codebases are currently indexed or being indexed.",
           },
         ],
+      };
+    }
+
+    if (!codebasePath) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Error: Path is required for clearing index.",
+          },
+        ],
+        isError: true,
       };
     }
 
@@ -936,7 +983,7 @@ export class ToolHandlers {
     }
   }
 
-  public async handleGetIndexingStatus(args: any) {
+  public async handleGetIndexingStatus(args: GetIndexingStatusArgs) {
     const { path: codebasePath } = args;
 
     try {
@@ -978,13 +1025,12 @@ export class ToolHandlers {
 
       switch (status) {
         case "indexed":
-          if (info && "indexedFiles" in info) {
-            const indexedInfo = info as any;
+          if (info && info.status === "indexed") {
             statusMessage = `✅ Codebase '${absolutePath}' is fully indexed and ready for search.`;
-            statusMessage += `\n📊 Statistics: ${indexedInfo.indexedFiles} files, ${indexedInfo.totalChunks} chunks`;
-            statusMessage += `\n📅 Status: ${indexedInfo.indexStatus}`;
+            statusMessage += `\n📊 Statistics: ${info.indexedFiles} files, ${info.totalChunks} chunks`;
+            statusMessage += `\n📅 Status: ${info.indexStatus}`;
             statusMessage += `\n🕐 Last updated: ${new Date(
-              indexedInfo.lastUpdated,
+              info.lastUpdated,
             ).toLocaleString()}`;
           } else {
             statusMessage = `✅ Codebase '${absolutePath}' is fully indexed and ready for search.`;
@@ -992,9 +1038,8 @@ export class ToolHandlers {
           break;
 
         case "indexing":
-          if (info && "indexingPercentage" in info) {
-            const indexingInfo = info as any;
-            const progressPercentage = indexingInfo.indexingPercentage || 0;
+          if (info && info.status === "indexing") {
+            const progressPercentage = info.indexingPercentage || 0;
             statusMessage = `🔄 Codebase '${absolutePath}' is currently being indexed. Progress: ${progressPercentage.toFixed(
               1,
             )}%`;
@@ -1007,7 +1052,7 @@ export class ToolHandlers {
                 " (Processing files and generating embeddings...)";
             }
             statusMessage += `\n🕐 Last updated: ${new Date(
-              indexingInfo.lastUpdated,
+              info.lastUpdated,
             ).toLocaleString()}`;
           } else {
             statusMessage = `🔄 Codebase '${absolutePath}' is currently being indexed.`;
@@ -1015,17 +1060,16 @@ export class ToolHandlers {
           break;
 
         case "indexfailed":
-          if (info && "errorMessage" in info) {
-            const failedInfo = info as any;
+          if (info && info.status === "indexfailed") {
             statusMessage = `❌ Codebase '${absolutePath}' indexing failed.`;
-            statusMessage += `\n🚨 Error: ${failedInfo.errorMessage}`;
-            if (failedInfo.lastAttemptedPercentage !== undefined) {
-              statusMessage += `\n📊 Failed at: ${failedInfo.lastAttemptedPercentage.toFixed(
+            statusMessage += `\n🚨 Error: ${info.errorMessage}`;
+            if (info.lastAttemptedPercentage !== undefined) {
+              statusMessage += `\n📊 Failed at: ${info.lastAttemptedPercentage.toFixed(
                 1,
               )}% progress`;
             }
             statusMessage += `\n🕐 Failed at: ${new Date(
-              failedInfo.lastUpdated,
+              info.lastUpdated,
             ).toLocaleString()}`;
             statusMessage += `\n💡 You can retry indexing by running the index_codebase command again.`;
           } else {

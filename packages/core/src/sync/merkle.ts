@@ -8,6 +8,11 @@ export interface MerkleDAGNode {
   children: string[];
 }
 
+export interface SerializedMerkleDAG {
+  nodes: [string, MerkleDAGNode][];
+  rootIds: string[];
+}
+
 export class MerkleDAG {
   nodes: Map<string, MerkleDAGNode>;
   rootIds: string[];
@@ -66,14 +71,14 @@ export class MerkleDAG {
     );
   }
 
-  public serialize(): any {
+  public serialize(): SerializedMerkleDAG {
     return {
       nodes: Array.from(this.nodes.entries()),
       rootIds: this.rootIds,
     };
   }
 
-  public static deserialize(data: any): MerkleDAG {
+  public static deserialize(data: SerializedMerkleDAG): MerkleDAG {
     const dag = new MerkleDAG();
     dag.nodes = new Map(data.nodes);
     dag.rootIds = data.rootIds;

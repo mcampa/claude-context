@@ -1,12 +1,12 @@
-import { Ollama } from "ollama";
+import { EmbedRequest, Ollama } from "ollama";
 import { Embedding, EmbeddingVector } from "./base-embedding";
 
 export interface OllamaEmbeddingConfig {
   model: string;
   host?: string;
-  fetch?: any;
+  fetch?: typeof globalThis.fetch;
   keepAlive?: string | number;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
   dimension?: number; // Optional dimension parameter
   maxTokens?: number; // Optional max tokens parameter
 }
@@ -67,7 +67,7 @@ export class OllamaEmbedding extends Embedding {
       );
     }
 
-    const embedOptions: any = {
+    const embedOptions: EmbedRequest = {
       model: this.config.model,
       input: processedText,
       options: this.config.options,
@@ -104,7 +104,7 @@ export class OllamaEmbedding extends Embedding {
     }
 
     // Use Ollama's native batch embedding API
-    const embedOptions: any = {
+    const embedOptions: EmbedRequest = {
       model: this.config.model,
       input: processedTexts, // Pass array directly to Ollama
       options: this.config.options,
@@ -184,7 +184,7 @@ export class OllamaEmbedding extends Embedding {
    * Set additional options
    * @param options Additional options for the model
    */
-  setOptions(options: Record<string, any>): void {
+  setOptions(options: Record<string, unknown>): void {
     this.config.options = options;
   }
 
@@ -209,7 +209,7 @@ export class OllamaEmbedding extends Embedding {
 
     try {
       const processedText = this.preprocessText(testText);
-      const embedOptions: any = {
+      const embedOptions: EmbedRequest = {
         model: this.config.model,
         input: processedText,
         options: this.config.options,

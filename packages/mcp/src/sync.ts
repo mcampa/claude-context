@@ -64,7 +64,7 @@ export class SyncManager {
             );
             continue;
           }
-        } catch (pathError: any) {
+        } catch (pathError) {
           console.error(
             `[SYNC-DEBUG] Error checking codebase path '${codebasePath}':`,
             pathError,

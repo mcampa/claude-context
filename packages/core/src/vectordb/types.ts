@@ -7,12 +7,12 @@ export interface VectorDocument {
   startLine: number;
   endLine: number;
   fileExtension: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface SearchOptions {
   topK?: number;
-  filter?: Record<string, any>;
+  filter?: Record<string, unknown>;
   threshold?: number;
   filterExpr?: string;
 }
@@ -21,7 +21,7 @@ export interface SearchOptions {
 export interface HybridSearchRequest {
   data: number[] | string; // Query vector or text
   anns_field: string; // Vector field name (vector or sparse_vector)
-  param: Record<string, any>; // Search parameters
+  param: Record<string, unknown>; // Search parameters
   limit: number;
 }
 
@@ -33,7 +33,7 @@ export interface HybridSearchOptions {
 
 export interface RerankStrategy {
   strategy: "rrf" | "weighted";
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 export interface VectorSearchResult {
@@ -148,7 +148,7 @@ export interface VectorDatabase {
     filter: string,
     outputFields: string[],
     limit?: number,
-  ): Promise<Record<string, any>[]>;
+  ): Promise<Record<string, unknown>[]>;
 
   /**
    * Check collection limit
