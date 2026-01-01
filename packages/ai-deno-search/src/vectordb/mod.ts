@@ -10,4 +10,4 @@ export type {
   VectorDatabase,
   VectorDocument,
   VectorSearchResult,
-} from "./types.ts";
+} from "./vectordb-types.ts";

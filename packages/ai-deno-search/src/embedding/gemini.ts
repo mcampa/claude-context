@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { Embedding, type EmbeddingVector } from "../types.ts";
+import { Embedding, type EmbeddingVector } from "./base-embedding.ts";
 
 export interface GeminiEmbeddingConfig {
   model: string;

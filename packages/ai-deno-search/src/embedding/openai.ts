@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { Embedding, type EmbeddingVector } from "../types.ts";
+import { Embedding, type EmbeddingVector } from "./base-embedding.ts";
 
 export interface OpenAIEmbeddingConfig {
   model: string;

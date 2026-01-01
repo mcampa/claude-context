@@ -1,5 +1,5 @@
 import { type EmbedRequest, Ollama } from "ollama";
-import { Embedding, type EmbeddingVector } from "../types.ts";
+import { Embedding, type EmbeddingVector } from "./base-embedding.ts";
 
 export interface OllamaEmbeddingConfig {
   model: string;

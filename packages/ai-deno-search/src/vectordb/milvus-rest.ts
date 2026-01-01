@@ -13,8 +13,8 @@ import type {
   VectorDatabase,
   VectorDocument,
   VectorSearchResult,
-} from "./types.ts";
-import { COLLECTION_LIMIT_MESSAGE } from "./types.ts";
+} from "./vectordb-types.ts";
+import { COLLECTION_LIMIT_MESSAGE } from "./vectordb-types.ts";
 
 export interface MilvusRestfulConfig {
   address: string; // Required - full address to Milvus server

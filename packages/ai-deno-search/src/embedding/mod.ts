@@ -12,4 +12,4 @@ export { OllamaEmbedding } from "./ollama.ts";
 export type { OllamaEmbeddingConfig } from "./ollama.ts";
 
 // Re-export base types
-export type { Embedding, EmbeddingVector } from "../types.ts";
+export type { Embedding, EmbeddingVector } from "./base-embedding.ts";

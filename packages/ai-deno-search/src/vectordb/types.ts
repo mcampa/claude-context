@@ -1,4 +1,4 @@
-// Re-export all vector DB types from core
+// Re-export all vector DB types
 export type {
   HybridSearchOptions,
   HybridSearchRequest,
@@ -8,6 +8,6 @@ export type {
   VectorDatabase,
   VectorDocument,
   VectorSearchResult,
-} from "../types.ts";
+} from "./vectordb-types.ts";
 
-export { COLLECTION_LIMIT_MESSAGE } from "../types.ts";
+export { COLLECTION_LIMIT_MESSAGE } from "./vectordb-types.ts";

@@ -1,10 +1,16 @@
-// Re-export search result types from core
-export type { SemanticSearchResult } from "../../core/src/types.ts";
+// Search result types
+export interface SemanticSearchResult {
+  content: string;
+  relativePath: string;
+  startLine: number;
+  endLine: number;
+  language: string;
+  score: number;
+}
 
 // Re-export embedding types
-export type { EmbeddingVector } from "../../core/src/embedding/base-embedding.ts";
-
-export { Embedding } from "../../core/src/embedding/base-embedding.ts";
+export type { EmbeddingVector } from "./embedding/base-embedding.ts";
+export { Embedding } from "./embedding/base-embedding.ts";
 
 // Re-export vector DB types
 export type {
@@ -16,6 +22,6 @@ export type {
   VectorDatabase,
   VectorDocument,
   VectorSearchResult,
-} from "../../core/src/vectordb/types.ts";
+} from "./vectordb/vectordb-types.ts";
 
-export { COLLECTION_LIMIT_MESSAGE } from "../../core/src/vectordb/types.ts";
+export { COLLECTION_LIMIT_MESSAGE } from "./vectordb/vectordb-types.ts";
