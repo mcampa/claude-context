@@ -1,4 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
 import { Embedding, type EmbeddingVector } from "./base-embedding.ts";
 
 export interface GeminiEmbeddingConfig {
@@ -9,7 +8,7 @@ export interface GeminiEmbeddingConfig {
 }
 
 export class GeminiEmbedding extends Embedding {
-  private client: GoogleGenAI;
+  private clientPromise: Promise<any> | null = null;
   private config: GeminiEmbeddingConfig;
   private dimension: number = 3072;
   protected maxTokens: number = 2048;
@@ -17,20 +16,29 @@ export class GeminiEmbedding extends Embedding {
   constructor(config: GeminiEmbeddingConfig) {
     super();
     this.config = config;
-    this.client = new GoogleGenAI({
-      apiKey: config.apiKey,
-      ...(config.baseURL && {
-        httpOptions: {
-          baseUrl: config.baseURL,
-        },
-      }),
-    });
 
     this.updateDimensionForModel(config.model || "gemini-embedding-001");
 
     if (config.outputDimensionality) {
       this.dimension = config.outputDimensionality;
     }
+  }
+
+  private async _getClient(): Promise<any> {
+    if (!this.clientPromise) {
+      this.clientPromise = (async () => {
+        const { GoogleGenAI } = await import("@google/genai");
+        return new GoogleGenAI({
+          apiKey: this.config.apiKey,
+          ...(this.config.baseURL && {
+            httpOptions: {
+              baseUrl: this.config.baseURL,
+            },
+          }),
+        });
+      })();
+    }
+    return this.clientPromise;
   }
 
   private updateDimensionForModel(model: string): void {
@@ -55,7 +63,8 @@ export class GeminiEmbedding extends Embedding {
     const model = this.config.model || "gemini-embedding-001";
 
     try {
-      const response = await this.client.models.embedContent({
+      const client = await this._getClient();
+      const response = await client.models.embedContent({
         model: model,
         contents: processedText,
         config: {
@@ -90,7 +99,8 @@ export class GeminiEmbedding extends Embedding {
     const model = this.config.model || "gemini-embedding-001";
 
     try {
-      const response = await this.client.models.embedContent({
+      const client = await this._getClient();
+      const response = await client.models.embedContent({
         model: model,
         contents: processedTexts,
         config: {
@@ -103,7 +113,7 @@ export class GeminiEmbedding extends Embedding {
         throw new Error("Gemini API returned invalid response");
       }
 
-      return response.embeddings.map((embedding) => {
+      return response.embeddings.map((embedding: any) => {
         if (!embedding.values) {
           throw new Error("Gemini API returned invalid embedding data");
         }
@@ -139,8 +149,8 @@ export class GeminiEmbedding extends Embedding {
     this.dimension = dimension;
   }
 
-  getClient(): GoogleGenAI {
-    return this.client;
+  async getClient(): Promise<any> {
+    return await this._getClient();
   }
 
   static getSupportedModels(): Record<
