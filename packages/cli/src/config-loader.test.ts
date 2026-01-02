@@ -1,7 +1,33 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { existsSync, mkdirSync, writeFileSync, rmSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  writeFileSync,
+  rmSync,
+  type PathLike,
+} from "fs";
 import { join } from "path";
-import { findConfigFile, loadConfig } from "./config-loader.js";
+import * as childProcess from "child_process";
+import { findConfigFile, loadConfig, findTsxBinary } from "./config-loader.js";
+
+// Mock fs and child_process modules
+vi.mock("fs", async () => {
+  const actual = await vi.importActual<typeof import("fs")>("fs");
+  return {
+    ...actual,
+    existsSync: vi.fn(actual.existsSync),
+  };
+});
+
+vi.mock("child_process", async () => {
+  const actual =
+    await vi.importActual<typeof import("child_process")>("child_process");
+  return {
+    ...actual,
+    execSync: vi.fn(),
+    spawnSync: vi.fn(),
+  };
+});
 
 // Test directory for temporary files
 const TEST_DIR = join(process.cwd(), ".test-temp");
@@ -28,6 +54,8 @@ describe("config-loader", () => {
       rmSync(TEST_DIR, { recursive: true, force: true });
     }
     vi.restoreAllMocks();
+    // Restore original environment
+    delete process.env.AI_CONTEXT_CLI_ROOT;
   });
 
   describe("findConfigFile", () => {
@@ -281,6 +309,210 @@ describe("config-loader", () => {
       expect(config.ignorePatterns).toEqual(["node_modules/**"]);
       expect(config.customExtensions).toEqual([".vue"]);
       expect(config.customIgnorePatterns).toEqual(["*.test.ts"]);
+    });
+  });
+
+  describe("findTsxBinary", () => {
+    const originalEnv = process.env.AI_CONTEXT_CLI_ROOT;
+    const originalCwd = process.cwd();
+
+    beforeEach(() => {
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        // Use actual existsSync for test directory operations
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return false;
+      });
+      vi.mocked(childProcess.execSync).mockClear();
+      vi.mocked(childProcess.spawnSync).mockClear();
+      delete process.env.AI_CONTEXT_CLI_ROOT;
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      if (originalEnv) {
+        process.env.AI_CONTEXT_CLI_ROOT = originalEnv;
+      }
+      process.chdir(originalCwd);
+    });
+
+    it("should find tsx in CLI package's node_modules", () => {
+      const cliRoot = "/fake/cli/root";
+      const tsxPath = join(cliRoot, "node_modules", ".bin", "tsx");
+      process.env.AI_CONTEXT_CLI_ROOT = cliRoot;
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return pathStr === tsxPath;
+      });
+
+      const result = findTsxBinary();
+      expect(result).toBe(tsxPath);
+    });
+
+    it("should find tsx in current working directory's node_modules when CLI package doesn't have it", () => {
+      const cwd = TEST_DIR;
+      process.chdir(cwd);
+      // After chdir, the path will be constructed using process.cwd()
+      const expectedPath = join(process.cwd(), "node_modules", ".bin", "tsx");
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        // Use actual existsSync for test directory operations
+        if (pathStr.includes(".test-temp")) {
+          const actualFs = require("fs");
+          // Only use actual for non-tsx paths
+          if (!pathStr.includes("node_modules/.bin/tsx")) {
+            return actualFs.existsSync(path);
+          }
+        }
+        // Match the exact path that will be checked
+        return pathStr === expectedPath;
+      });
+
+      const result = findTsxBinary();
+      expect(result).toBe(expectedPath);
+    });
+
+    it("should find tsx via which command when not in node_modules", () => {
+      const globalTsxPath = "/usr/local/bin/tsx";
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return pathStr === globalTsxPath;
+      });
+      vi.mocked(childProcess.execSync).mockReturnValue(globalTsxPath + "\n");
+
+      const result = findTsxBinary();
+      expect(result).toBe(globalTsxPath);
+    });
+
+    it("should find tsx via direct spawn when available in PATH", () => {
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return false;
+      });
+      vi.mocked(childProcess.execSync).mockImplementation(() => {
+        throw new Error("tsx not found");
+      });
+      vi.mocked(childProcess.spawnSync).mockReturnValue({
+        status: 0,
+        stdout: "",
+        stderr: "",
+      } as any);
+
+      const result = findTsxBinary();
+      expect(result).toBe("tsx");
+    });
+
+    it("should return null when tsx is not found anywhere", () => {
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return false;
+      });
+      vi.mocked(childProcess.execSync).mockImplementation(() => {
+        throw new Error("tsx not found");
+      });
+      vi.mocked(childProcess.spawnSync).mockReturnValue({
+        status: 1,
+        stdout: "",
+        stderr: "",
+      } as any);
+
+      const result = findTsxBinary();
+      expect(result).toBeNull();
+    });
+
+    it("should prefer CLI package's tsx over local node_modules", () => {
+      const cliRoot = "/fake/cli/root";
+      const cliTsxPath = join(cliRoot, "node_modules", ".bin", "tsx");
+      const cwd = TEST_DIR;
+      const localTsxPath = join(cwd, "node_modules", ".bin", "tsx");
+      process.env.AI_CONTEXT_CLI_ROOT = cliRoot;
+      process.chdir(cwd);
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return pathStr === cliTsxPath || pathStr === localTsxPath;
+      });
+
+      const result = findTsxBinary();
+      expect(result).toBe(cliTsxPath);
+    });
+
+    it("should prefer local node_modules over global tsx", () => {
+      const cwd = TEST_DIR;
+      process.chdir(cwd);
+      // After chdir, the path will be constructed using process.cwd()
+      const expectedLocalPath = join(
+        process.cwd(),
+        "node_modules",
+        ".bin",
+        "tsx",
+      );
+      const globalTsxPath = "/usr/local/bin/tsx";
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        // Use actual existsSync for test directory operations
+        if (pathStr.includes(".test-temp")) {
+          const actualFs = require("fs");
+          // Only use actual for non-tsx paths
+          if (!pathStr.includes("node_modules/.bin/tsx")) {
+            return actualFs.existsSync(path);
+          }
+        }
+        // Match the exact paths that will be checked
+        return pathStr === expectedLocalPath || pathStr === globalTsxPath;
+      });
+      vi.mocked(childProcess.execSync).mockReturnValue(globalTsxPath + "\n");
+
+      const result = findTsxBinary();
+      expect(result).toBe(expectedLocalPath);
+    });
+
+    it("should handle Windows which command (where)", () => {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, "platform", {
+        value: "win32",
+        writable: true,
+      });
+
+      const globalTsxPath = "C:\\Program Files\\nodejs\\tsx.cmd";
+
+      vi.mocked(existsSync).mockImplementation((path: PathLike) => {
+        const pathStr = String(path);
+        if (pathStr.includes(".test-temp")) {
+          return require("fs").existsSync(path);
+        }
+        return pathStr === globalTsxPath;
+      });
+      vi.mocked(childProcess.execSync).mockReturnValue(globalTsxPath + "\r\n");
+
+      const result = findTsxBinary();
+      expect(result).toBe(globalTsxPath);
+
+      Object.defineProperty(process, "platform", {
+        value: originalPlatform,
+        writable: true,
+      });
     });
   });
 });

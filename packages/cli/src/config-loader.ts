@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import { resolve, join } from "path";
 import { pathToFileURL } from "url";
-import { spawnSync } from "child_process";
+import { spawnSync, execSync } from "child_process";
 import type { ContextConfig } from "./types.js";
 
 const CONFIG_FILE_NAMES = ["ai-context.config.ts", "ai-context.config.js"];
@@ -21,20 +21,62 @@ export function findConfigFile(cwd: string): string | null {
 }
 
 /**
+ * Find tsx binary in multiple locations
+ */
+export function findTsxBinary(): string | null {
+  // 1. Check CLI package's node_modules
+  const cliRoot = process.env.AI_CONTEXT_CLI_ROOT;
+  if (cliRoot) {
+    const cliPath = join(cliRoot, "node_modules", ".bin", "tsx");
+    if (existsSync(cliPath)) {
+      return cliPath;
+    }
+  }
+
+  // 2. Check current working directory's node_modules (where user is running the command)
+  const cwd = process.cwd();
+  const localPath = join(cwd, "node_modules", ".bin", "tsx");
+  if (existsSync(localPath)) {
+    return localPath;
+  }
+
+  // 3. Check if tsx is available in PATH (globally installed)
+  try {
+    // Use 'which' on Unix-like systems, 'where' on Windows
+    const command = process.platform === "win32" ? "where tsx" : "which tsx";
+    const tsxPath = execSync(command, { encoding: "utf-8", stdio: "pipe" })
+      .trim()
+      .split("\n")[0];
+    if (tsxPath && existsSync(tsxPath)) {
+      return tsxPath;
+    }
+  } catch {
+    // tsx not found in PATH, continue to next check
+  }
+
+  // 4. Try to use 'tsx' directly (might work if it's in PATH and spawn can find it)
+  // We'll test this by trying to spawn it
+  try {
+    const testResult = spawnSync("tsx", ["--version"], {
+      encoding: "utf-8",
+      stdio: "pipe",
+    });
+    if (testResult.status === 0) {
+      return "tsx"; // Return the command name if it works
+    }
+  } catch {
+    // tsx command not available
+  }
+
+  return null;
+}
+
+/**
  * Load a TypeScript config file by spawning tsx
  */
 function loadTypeScriptConfig(filePath: string): ContextConfig {
-  // Get the CLI root from environment or fallback
-  const cliRoot = process.env.AI_CONTEXT_CLI_ROOT;
-
-  // Find tsx binary
-  let tsxPath: string | null = null;
-  if (cliRoot) {
-    const possiblePath = join(cliRoot, "node_modules", ".bin", "tsx");
-    if (existsSync(possiblePath)) {
-      tsxPath = possiblePath;
-    }
-  }
+  // Find tsx binary in multiple locations
+  const tsxPath = findTsxBinary();
 
   if (!tsxPath) {
     throw new Error(
