@@ -41,13 +41,13 @@ major.minor.patch[-prerelease]
 
 ### Examples
 
-| Version | Description |
-|---------|-------------|
-| `v1.0.0` | Stable release |
-| `v1.2.3` | Patch release |
-| `v2.0.0-beta.1` | Beta prerelease |
-| `v2.0.0-alpha.1` | Alpha prerelease |
-| `v1.0.0-rc.1` | Release candidate |
+| Version          | Description       |
+| ---------------- | ----------------- |
+| `v1.0.0`         | Stable release    |
+| `v1.2.3`         | Patch release     |
+| `v2.0.0-beta.1`  | Beta prerelease   |
+| `v2.0.0-alpha.1` | Alpha prerelease  |
+| `v1.0.0-rc.1`    | Release candidate |
 
 ## GitHub Actions Workflow
 
@@ -117,4 +117,3 @@ If you need to release manually:
 2. Commit: `git commit -am "chore: release v0.0.2"`
 3. Tag: `git tag v0.0.2`
 4. Push: `git push && git push origin v0.0.2`
-
