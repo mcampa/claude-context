@@ -200,16 +200,22 @@ function release() {
   console.log(`   Current version: ${currentVersion}`);
   console.log(`   New version: ${version}`);
 
-  // Step 4: Validate new version is higher
+  // Step 4: Validate new version is higher or equal
   const comparison = compareSemver(version, currentVersion);
-  if (comparison <= 0) {
+  if (comparison < 0) {
     console.error("");
     console.error(
-      `❌ Error: New version (${version}) must be higher than current version (${currentVersion})`,
+      `❌ Error: New version (${version}) must be higher than or equal to current version (${currentVersion})`,
     );
     process.exit(1);
   }
-  console.log(`   ✅ Version ${version} is higher than ${currentVersion}`);
+  if (comparison === 0) {
+    console.log(
+      `   ⚠️  Version ${version} is the same as current version (re-release)`,
+    );
+  } else {
+    console.log(`   ✅ Version ${version} is higher than ${currentVersion}`);
+  }
 
   // Step 5: Check git status
   console.log("");
