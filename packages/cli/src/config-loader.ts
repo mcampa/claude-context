@@ -1,10 +1,14 @@
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { resolve, join } from "path";
 import { pathToFileURL } from "url";
 import { spawnSync, execSync } from "child_process";
 import type { ContextConfig } from "./types.js";
 
-const CONFIG_FILE_NAMES = ["ai-context.config.ts", "ai-context.config.js"];
+const CONFIG_FILE_NAMES = [
+  "ai-context.config.ts",
+  "ai-context.config.js",
+  "ai-context.config.json",
+];
 
 /**
  * Find the config file in the given directory
@@ -131,6 +135,76 @@ async function loadJavaScriptConfig(filePath: string): Promise<ContextConfig> {
 }
 
 /**
+ * Replace environment variable placeholders in a string
+ * Placeholders are in the format [ENV_VAR_NAME]
+ */
+function substituteEnvVars(value: string): string {
+  return value.replace(/\[([A-Z_][A-Z0-9_]*)\]/g, (match, envVarName) => {
+    const envValue = process.env[envVarName];
+    if (envValue === undefined) {
+      throw new Error(
+        `Environment variable '${envVarName}' is not set (referenced as ${match} in config)`,
+      );
+    }
+    return envValue;
+  });
+}
+
+/**
+ * Recursively process an object and substitute environment variables in string values
+ */
+function processEnvVars<T>(obj: T): T {
+  if (typeof obj === "string") {
+    return substituteEnvVars(obj) as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => processEnvVars(item)) as T;
+  }
+  if (obj !== null && typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = processEnvVars(value);
+    }
+    return result as T;
+  }
+  return obj;
+}
+
+/**
+ * Load a JSON config file
+ * Supports environment variable substitution using [ENV_VAR_NAME] syntax
+ */
+function loadJsonConfig(filePath: string): ContextConfig {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    const parsed = JSON.parse(content);
+
+    // Validate that parsed JSON is an object (not null, array, or primitive)
+    if (
+      parsed === null ||
+      typeof parsed !== "object" ||
+      Array.isArray(parsed)
+    ) {
+      throw new Error(
+        "JSON config must be an object, not " +
+          (parsed === null
+            ? "null"
+            : Array.isArray(parsed)
+              ? "an array"
+              : typeof parsed),
+      );
+    }
+
+    return processEnvVars(parsed);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON in config file: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
  * Load and validate the configuration file
  * @param configPath Path to the config file, or directory to search for config
  * @returns Validated configuration object
@@ -152,7 +226,7 @@ export async function loadConfig(configPath?: string): Promise<ContextConfig> {
       throw new Error(
         `No config file found. Please create one of:\n` +
           CONFIG_FILE_NAMES.map((f) => `  - ${f}`).join("\n") +
-          `\n\nExample config:\n\n` +
+          `\n\nExample JS/TS config:\n\n` +
           `export default {\n` +
           `  name: "my-project",\n` +
           `  embeddingConfig: {\n` +
@@ -162,7 +236,18 @@ export async function loadConfig(configPath?: string): Promise<ContextConfig> {
           `  vectorDatabaseConfig: {\n` +
           `    address: "localhost:19530",\n` +
           `  },\n` +
-          `};`,
+          `};\n\n` +
+          `Example JSON config (ai-context.config.json):\n\n` +
+          `{\n` +
+          `  "name": "my-project",\n` +
+          `  "embeddingConfig": {\n` +
+          `    "apiKey": "[OPENAI_API_KEY]",\n` +
+          `    "model": "text-embedding-3-small"\n` +
+          `  },\n` +
+          `  "vectorDatabaseConfig": {\n` +
+          `    "address": "localhost:19530"\n` +
+          `  }\n` +
+          `}`,
       );
     }
     resolvedPath = foundPath;
@@ -175,6 +260,8 @@ export async function loadConfig(configPath?: string): Promise<ContextConfig> {
 
     if (resolvedPath.endsWith(".ts") || resolvedPath.endsWith(".tsx")) {
       config = loadTypeScriptConfig(resolvedPath);
+    } else if (resolvedPath.endsWith(".json")) {
+      config = loadJsonConfig(resolvedPath);
     } else {
       config = await loadJavaScriptConfig(resolvedPath);
     }

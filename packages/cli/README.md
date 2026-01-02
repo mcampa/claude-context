@@ -24,7 +24,9 @@ npm install -D @mcampa/ai-context-cli
 
 ## Quick Start
 
-1. Create a configuration file `ai-context.config.ts` in your project root:
+1. Create a configuration file in your project root. You can use TypeScript (`.ts`), JavaScript (`.js`), or JSON (`.json`):
+
+**TypeScript/JavaScript projects** - `ai-context.config.ts`:
 
 ```typescript
 import type { ContextConfig } from "@mcampa/ai-context-cli";
@@ -43,6 +45,21 @@ const config: ContextConfig = {
 };
 
 export default config;
+```
+
+**Non-JS/TS projects (Python, Go, Rust, etc.)** - `ai-context.config.json`:
+
+```json
+{
+  "name": "my-project",
+  "embeddingConfig": {
+    "apiKey": "[OPENAI_API_KEY]",
+    "model": "text-embedding-3-small"
+  },
+  "vectorDatabaseConfig": {
+    "address": "localhost:19530"
+  }
+}
 ```
 
 2. Run the indexer:
@@ -120,6 +137,43 @@ const config = {
 export default config;
 ```
 
+### JSON Configuration (`ai-context.config.json`)
+
+For non-JavaScript/TypeScript projects (Python, Go, Rust, etc.), you can use a JSON config file:
+
+```json
+{
+  "name": "my-project",
+  "embeddingConfig": {
+    "apiKey": "[OPENAI_API_KEY]",
+    "model": "text-embedding-3-small"
+  },
+  "vectorDatabaseConfig": {
+    "token": "[ZILLIZ_TOKEN]",
+    "address": "localhost:19530"
+  },
+  "supportedExtensions": [".py", ".go", ".rs"],
+  "ignorePatterns": ["venv/**", "__pycache__/**", "target/**"],
+  "customExtensions": [".proto"],
+  "customIgnorePatterns": ["*_test.go"]
+}
+```
+
+#### Environment Variable Substitution
+
+JSON configs support environment variable substitution using the `[ENV_VAR_NAME]` syntax. Any value containing `[VARIABLE_NAME]` will be replaced with the corresponding environment variable:
+
+```json
+{
+  "embeddingConfig": {
+    "apiKey": "[OPENAI_API_KEY]",
+    "baseURL": "https://[API_HOST]:[API_PORT]/v1"
+  }
+}
+```
+
+The CLI will throw an error if a referenced environment variable is not set, ensuring you don't accidentally run with missing configuration
+
 ## CLI Options
 
 ```
@@ -127,7 +181,7 @@ Usage: ai-context-index [options]
 
 Options:
   -V, --version        output the version number
-  -c, --config <path>  path to config file (default: ai-context.config.ts/js)
+  -c, --config <path>  path to config file (default: ai-context.config.ts/js/json)
   -f, --force          force reindex even if collection already exists
   -h, --help           display help for command
 ```
@@ -232,7 +286,7 @@ Use `customExtensions` to add more file types or `supportedExtensions` to overri
 
 ### "Config file not found"
 
-Make sure you have a config file named `ai-context.config.ts` or `ai-context.config.js` in the directory where you're running the command, or specify a custom path with `--config`.
+Make sure you have a config file named `ai-context.config.ts`, `ai-context.config.js`, or `ai-context.config.json` in the directory where you're running the command, or specify a custom path with `--config`.
 
 ### "Missing required field: embeddingConfig.apiKey"
 

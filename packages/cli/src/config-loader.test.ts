@@ -89,6 +89,34 @@ describe("config-loader", () => {
       const result = findConfigFile(TEST_DIR);
       expect(result).toBe(tsConfigPath);
     });
+
+    it("should find ai-context.config.json", () => {
+      const configPath = join(TEST_DIR, "ai-context.config.json");
+      writeFileSync(configPath, "{}");
+
+      const result = findConfigFile(TEST_DIR);
+      expect(result).toBe(configPath);
+    });
+
+    it("should prefer .ts over .json", () => {
+      const tsConfigPath = join(TEST_DIR, "ai-context.config.ts");
+      const jsonConfigPath = join(TEST_DIR, "ai-context.config.json");
+      writeFileSync(tsConfigPath, "export default {};");
+      writeFileSync(jsonConfigPath, "{}");
+
+      const result = findConfigFile(TEST_DIR);
+      expect(result).toBe(tsConfigPath);
+    });
+
+    it("should prefer .js over .json", () => {
+      const jsConfigPath = join(TEST_DIR, "ai-context.config.js");
+      const jsonConfigPath = join(TEST_DIR, "ai-context.config.json");
+      writeFileSync(jsConfigPath, "export default {};");
+      writeFileSync(jsonConfigPath, "{}");
+
+      const result = findConfigFile(TEST_DIR);
+      expect(result).toBe(jsConfigPath);
+    });
   });
 
   describe("loadConfig", () => {
@@ -309,6 +337,198 @@ describe("config-loader", () => {
       expect(config.ignorePatterns).toEqual(["node_modules/**"]);
       expect(config.customExtensions).toEqual([".vue"]);
       expect(config.customIgnorePatterns).toEqual(["*.test.ts"]);
+    });
+
+    it("should load and validate a valid JSON config", async () => {
+      const configPath = getUniqueConfigPath("json");
+      const configContent = JSON.stringify({
+        name: "test-project",
+        embeddingConfig: {
+          apiKey: "test-key",
+          model: "text-embedding-3-small",
+        },
+        vectorDatabaseConfig: {
+          address: "localhost:19530",
+        },
+      });
+      writeFileSync(configPath, configContent);
+
+      const config = await loadConfig(configPath);
+
+      expect(config.name).toBe("test-project");
+      expect(config.embeddingConfig?.apiKey).toBe("test-key");
+      expect(config.embeddingConfig?.model).toBe("text-embedding-3-small");
+      expect(config.vectorDatabaseConfig?.address).toBe("localhost:19530");
+    });
+
+    it("should throw error for invalid JSON syntax", async () => {
+      const configPath = getUniqueConfigPath("json");
+      // Invalid JSON (trailing comma)
+      writeFileSync(
+        configPath,
+        '{ "name": "test", "embeddingConfig": { "apiKey": "key", } }',
+      );
+
+      await expect(loadConfig(configPath)).rejects.toThrow("Invalid JSON");
+    });
+
+    it("should throw error when JSON config contains null", async () => {
+      const configPath = getUniqueConfigPath("json");
+      writeFileSync(configPath, "null");
+
+      await expect(loadConfig(configPath)).rejects.toThrow(
+        "JSON config must be an object",
+      );
+    });
+
+    it("should throw error when JSON config contains an array", async () => {
+      const configPath = getUniqueConfigPath("json");
+      writeFileSync(configPath, "[]");
+
+      await expect(loadConfig(configPath)).rejects.toThrow(
+        "JSON config must be an object",
+      );
+    });
+
+    it("should throw error when JSON config contains a primitive", async () => {
+      const configPath = getUniqueConfigPath("json");
+      writeFileSync(configPath, '"just a string"');
+
+      await expect(loadConfig(configPath)).rejects.toThrow(
+        "JSON config must be an object",
+      );
+    });
+
+    it("should accept JSON config with all optional fields", async () => {
+      const configPath = getUniqueConfigPath("json");
+      const configContent = JSON.stringify({
+        name: "test-project",
+        embeddingConfig: {
+          apiKey: "test-key",
+          model: "text-embedding-3-small",
+          baseURL: "https://custom.api.com",
+        },
+        vectorDatabaseConfig: {
+          address: "localhost:19530",
+          ssl: true,
+        },
+        supportedExtensions: [".py", ".go"],
+        ignorePatterns: ["venv/**"],
+        customExtensions: [".rs"],
+        customIgnorePatterns: ["*.pyc"],
+      });
+      writeFileSync(configPath, configContent);
+
+      const config = await loadConfig(configPath);
+      expect(config.name).toBe("test-project");
+      expect(config.embeddingConfig?.baseURL).toBe("https://custom.api.com");
+      expect(config.vectorDatabaseConfig?.ssl).toBe(true);
+      expect(config.supportedExtensions).toEqual([".py", ".go"]);
+      expect(config.customExtensions).toEqual([".rs"]);
+    });
+
+    it("should substitute environment variables in JSON config", async () => {
+      const configPath = getUniqueConfigPath("json");
+      // Set environment variables for the test
+      process.env.TEST_API_KEY = "my-secret-api-key";
+      process.env.TEST_MILVUS_TOKEN = "my-milvus-token";
+
+      const configContent = JSON.stringify({
+        name: "test-project",
+        embeddingConfig: {
+          apiKey: "[TEST_API_KEY]",
+          model: "text-embedding-3-small",
+        },
+        vectorDatabaseConfig: {
+          token: "[TEST_MILVUS_TOKEN]",
+          address: "localhost:19530",
+        },
+      });
+      writeFileSync(configPath, configContent);
+
+      try {
+        const config = await loadConfig(configPath);
+        expect(config.embeddingConfig?.apiKey).toBe("my-secret-api-key");
+        expect(config.vectorDatabaseConfig?.token).toBe("my-milvus-token");
+      } finally {
+        // Clean up environment variables
+        delete process.env.TEST_API_KEY;
+        delete process.env.TEST_MILVUS_TOKEN;
+      }
+    });
+
+    it("should throw error for missing environment variable in JSON config", async () => {
+      const configPath = getUniqueConfigPath("json");
+      // Make sure the env var is not set
+      delete process.env.NONEXISTENT_VAR;
+
+      const configContent = JSON.stringify({
+        name: "test-project",
+        embeddingConfig: {
+          apiKey: "[NONEXISTENT_VAR]",
+          model: "text-embedding-3-small",
+        },
+        vectorDatabaseConfig: {
+          address: "localhost:19530",
+        },
+      });
+      writeFileSync(configPath, configContent);
+
+      await expect(loadConfig(configPath)).rejects.toThrow(
+        "Environment variable 'NONEXISTENT_VAR' is not set",
+      );
+    });
+
+    it("should substitute multiple env vars in the same string", async () => {
+      const configPath = getUniqueConfigPath("json");
+      process.env.TEST_HOST = "api.example.com";
+      process.env.TEST_PORT = "8080";
+
+      const configContent = JSON.stringify({
+        embeddingConfig: {
+          apiKey: "test-key",
+          model: "text-embedding-3-small",
+          baseURL: "https://[TEST_HOST]:[TEST_PORT]/v1",
+        },
+        vectorDatabaseConfig: {
+          address: "localhost:19530",
+        },
+      });
+      writeFileSync(configPath, configContent);
+
+      try {
+        const config = await loadConfig(configPath);
+        expect(config.embeddingConfig?.baseURL).toBe(
+          "https://api.example.com:8080/v1",
+        );
+      } finally {
+        delete process.env.TEST_HOST;
+        delete process.env.TEST_PORT;
+      }
+    });
+
+    it("should handle env vars in arrays", async () => {
+      const configPath = getUniqueConfigPath("json");
+      process.env.TEST_PATTERN = "secret/**";
+
+      const configContent = JSON.stringify({
+        embeddingConfig: {
+          apiKey: "test-key",
+          model: "text-embedding-3-small",
+        },
+        vectorDatabaseConfig: {
+          address: "localhost:19530",
+        },
+        ignorePatterns: ["node_modules/**", "[TEST_PATTERN]"],
+      });
+      writeFileSync(configPath, configContent);
+
+      try {
+        const config = await loadConfig(configPath);
+        expect(config.ignorePatterns).toEqual(["node_modules/**", "secret/**"]);
+      } finally {
+        delete process.env.TEST_PATTERN;
+      }
     });
   });
 
