@@ -74,4 +74,3 @@ export abstract class Embedding {
    */
   abstract getProvider(): string;
 }
-

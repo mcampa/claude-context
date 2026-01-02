@@ -163,4 +163,3 @@ export interface VectorDatabase {
  */
 export const COLLECTION_LIMIT_MESSAGE =
   "[Error]: Your Zilliz Cloud account has hit its collection limit. To continue creating collections, you'll need to expand your capacity. We recommend visiting https://zilliz.com/pricing to explore options for dedicated or serverless clusters.";
-
